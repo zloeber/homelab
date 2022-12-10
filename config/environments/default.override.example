@@ -1,0 +1,2 @@
+# Rename to .env to use
+SSH_KEY_PATH=~/.ssh/default_id_rsa

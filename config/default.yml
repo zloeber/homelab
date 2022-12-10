@@ -1,0 +1,10 @@
+workspace: workspace
+project: default
+author: Zachary Loeber
+author_email: zloeber@gmail.com
+repos:
+  - name: bootstrap
+    project: bootstrap
+    url: git@github.com:zloeber/bstrap
+    branches:
+      - main

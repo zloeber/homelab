@@ -1,0 +1,26 @@
+desc: earthly tasks
+version: "3"
+env:
+  earthly: "{{.LOCAL_BIN_PATH}}/earthly"
+  earthly_version: "0.6.10"
+
+tasks:
+  show:
+    desc: Show task variables
+    silent: true
+    cmds:
+      - |
+        echo "LOCAL_BIN_PATH: {{.LOCAL_BIN_PATH}}"
+        echo "earthly: {{.earthly}}"
+        echo "earthly_version: {{.earthly_version}}"
+
+  install:
+    desc: Install earthly
+    silent: true
+    cmds:
+      - |
+        mkdir -p {{.LOCAL_BIN_PATH}}
+        wget https://github.com/earthly/earthly/releases/download/v{{.earthly_version}}/earthly-{{OS}}-{{ARCH}} -O {{.earthly}}
+        chmod +x {{.earthly}}
+    status:
+      - test -f {{.earthly}}
