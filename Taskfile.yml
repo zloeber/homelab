@@ -134,3 +134,12 @@ tasks:
         {{.task_binary}} $taskitem;
         echo "";
       done
+
+  aqua:sync:
+    desc: Attempt to install aqua cli
+    deps:
+      - 'install:aqua'
+    silent: true
+    cmds:
+      - |
+        ./.local/bin/aqua install

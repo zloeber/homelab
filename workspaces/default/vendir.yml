@@ -18,14 +18,10 @@ minimumRequiredVersion: 0.8.0
 # one or more directories to manage with vendir
 directories:
 - # path is relative to `vendir` CLI working directory
-  path: workspace/default
+  path: .
 
   contents:
-  - # path lives relative to directory path # (required)
-    path: github.com/cloudfoundry/cf-k8s-networking
-
-    # uses git to clone Git repository (optional)
-    git:
+  - git:
       # http or ssh urls are supported (required)
       url: https://github.com/zloeber/kubestrap
       # branch, tag, commit; origin is the name of the remote (required)
@@ -34,18 +30,6 @@ directories:
       # depth of commits to fetch; 0 (default) means everything (optional; v0.29.0+)
       depth: 1
       # specifies a strategy to resolve to an explicit ref (optional; v0.11.0+)
-      refSelection:
-        semver:
-          # list of semver constraints (see versions.md for details) (required)
-          constraints: ">0.4.0"
-          # by default prerelease versions are not included (optional; v0.12.0+)
-          prereleases:
-            # select prerelease versions that include given identifiers (optional; v0.12.0+)
-            identifiers: [beta, rc]
-      # skip downloading lfs files (optional)
-      lfsSkipSmudge: false
-      # skip initializing any git submodules (optional; v0.28.0+)
-      skipInitSubmodules: false
       # verify gpg signatures on commits or tags (optional; v0.12.0+)
       # verification:
       #   publicKeysSecretRef:
@@ -210,4 +194,4 @@ directories:
     # legalPaths: []
 
     # make subdirectory to be new root path within this asset (optional; v0.11.0+)
-    newRootPath: workspaces/default
+    newRootPath: default
