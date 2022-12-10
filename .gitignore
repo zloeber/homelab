@@ -17,4 +17,4 @@
 ./secure
 ./private
 *id_rsa
-./workspaces/default/**/
+workspaces/default/*/
