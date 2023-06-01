@@ -4,7 +4,7 @@ vars:
   rover: '{{.PROJECT_BIN_PATH}}/rover'
   ROVER_VERSION: '{{default "0.2.2" .ROVER_VERSION}}'
   DOCKER_BUILDKIT: 1
-  DOCKER_SERVER: '{{default "registry.docker.com" .DOCKER_SERVER}}'
+  DOCKER_SERVER: '{{default "cloud.canister.io:5000" .DOCKER_SERVER}}'
   DOCKER_FILE: '{{default "Dockerfile" .DOCKER_FILE}}'
   DOCKER_PATH: '{{default "." .DOCKER_PATH}}'
   DOCKER_EXTRACT_PATH: '{{default "." .DOCKER_EXTRACT_PATH}}'

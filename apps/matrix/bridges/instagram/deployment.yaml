@@ -20,7 +20,7 @@ spec:
         fsGroup: 1000
       initContainers:
         - name: load-config
-          image: docker.io/grubertech/envsubst:v1.2.0
+          image: cloud.canister.io:5000/zloeber/envsubst:v1.2.0
           imagePullPolicy: IfNotPresent
           command: ["sh"]
           args:

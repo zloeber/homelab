@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: bot
-          image: docker.io/grubertech/chatgpt:v1.2.1
+          image: cloud.canister.io:5000/zloeber/chatgpt:v1.2.1
           imagePullPolicy: Always
           envFrom:
             - configMapRef:

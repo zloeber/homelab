@@ -54,9 +54,9 @@ vars:
 
 dotenv:
   - '.SECRET'
-  - '{{.CONFIG_PATH}}/profiles/{{.PROFILE}}.env'
-  - '{{.CONFIG_PATH}}/environments/{{.TARGET}}.env'
-  - '{{.CONFIG_PATH}}/environments/{{.TARGET}}.override.env'
+  # - '{{.CONFIG_PATH}}/profiles/{{.PROFILE}}.env'
+  # - '{{.CONFIG_PATH}}/environments/{{.TARGET}}.env'
+  # - '{{.CONFIG_PATH}}/environments/{{.TARGET}}.override.env'
 
 
 includes:
@@ -68,7 +68,7 @@ includes:
   secrets: ./tasks/secrets.Taskfile.yaml
   longhorn: ./tasks/longhorn.Taskfile.yaml
   cluster: ./tasks/taskfiles/cluster
-  #matrix: ./tasks/matrix.Taskfile.yaml
+  matrix: ./tasks/matrix.Taskfile.yaml
   argocd: ./tasks/taskfiles/argocd
   git: ./tasks/taskfiles/git
   asdf: ./tasks/taskfiles/asdf
@@ -80,6 +80,7 @@ includes:
   workstation: ./tasks/taskfiles/workstation
   kind: ./tasks/taskfiles/kind
   k3d: ./tasks/taskfiles/k3d
+
 tasks:
   default:
     silent: true
@@ -288,3 +289,11 @@ tasks:
       - echo -e "Added 'k8s.localhost' and related domains to your hosts file!"
       - task: reset
     ignore_error: true
+  
+  start:
+    desc: Start a full local deployment to k3d
+    cmds:
+      - task: k3d:delete
+      - task: k3d:start
+      - task: repo
+      - task: argocd:deploy

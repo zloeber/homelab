@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: docker.io/grubertech/chatgpt-plugin:latest
+        image: cloud.canister.io:5000/zloeber/chatgpt-plugin:latest
         imagePullPolicy: Always
         envFrom:
         - configMapRef:

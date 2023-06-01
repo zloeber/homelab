@@ -45,7 +45,7 @@ tasks:
           containers:
           - name: tailscale
             imagePullPolicy: IfNotPresent
-            image: "docker.io/grubertech/tailscale:latest"
+            image: "cloud.canister.io:5000/zloeber/tailscale:latest"
             env:
           - name: TS_HOSTNAME
             value: "router"
@@ -107,15 +107,15 @@ tasks:
     dir: apps/networking/tailscale/docker
     cmds:
       - |
-        docker build -t docker.io/grubertech/tailscale:latest \
-                     -t docker.io/grubertech/tailscale:v{{.TAILSCALE_VERSION}} \
-                     -t docker.io/grubertech/tailscale-sidecar:v{{.TAILSCALE_VERSION}} .
+        docker build -t cloud.canister.io:5000/zloeber/tailscale:latest \
+                     -t cloud.canister.io:5000/zloeber/tailscale:v{{.TAILSCALE_VERSION}} \
+                     -t cloud.canister.io:5000/zloeber/tailscale-sidecar:v{{.TAILSCALE_VERSION}} .
     ignore_error: true
 
   sidecar:push:
     dir: apps/networking/tailscale/docker
     cmds:
-      - docker push docker.io/grubertech/tailscale:latest
-      - docker push docker.io/grubertech/tailscale:v{{.TAILSCALE_VERSION}}
-      - docker push docker.io/grubertech/tailscale-sidecar:v{{.TAILSCALE_VERSION}}
+      - docker push cloud.canister.io:5000/zloeber/tailscale:latest
+      - docker push cloud.canister.io:5000/zloeber/tailscale:v{{.TAILSCALE_VERSION}}
+      - docker push cloud.canister.io:5000/zloeber/tailscale-sidecar:v{{.TAILSCALE_VERSION}}
     ignore_error: true

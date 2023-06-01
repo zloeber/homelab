@@ -16,6 +16,7 @@ vars:
   GH_OWNER: zloeber
   GH_PUBLIC_DEPLOY_REPO: homelab
   GH_PRIVATE_DEPLOY_REPO: homelab-private
+  DOCKER_REGISTRY: cloud.canister.io:5000
 
 silent: true
 
@@ -50,19 +51,6 @@ tasks:
       echo "GIT_URI: {{.GIT_URI}}"
       echo "GH_USER: ${GH_USER}"
       echo "GH_PASS: ${GH_PASS}"
-      kubectl apply -f - << EOF
-      apiVersion: v1
-      kind: Secret
-      metadata:
-        name: private-repo-creds
-        labels:
-          argocd.argoproj.io/secret-type: repo-creds
-      stringData:
-        type: git
-        url: {{.GIT_URI}}
-        password: $GH_PASS
-        username: $GH_USER
-      EOF
     ignore_error: true
 
   repo:
@@ -132,10 +120,10 @@ tasks:
     dir: apps/argocd
     cmds:
     - |
-      docker build -t docker.io/grubertech/argocd-sidecar:latest \
-                   -t docker.io/grubertech/argocd-sidecar:v{{.ARGOCD_VERSION}} \
-                   -t docker.io/grubertech/argocd:v{{.ARGOCD_VERSION}} \
-                   -t docker.io/grubertech/argocd:latest .
+      docker build -t {{.DOCKER_REGISTRY}}/zloeber/argocd-sidecar:latest \
+                   -t {{.DOCKER_REGISTRY}}/zloeber/argocd-sidecar:v{{.ARGOCD_VERSION}} \
+                   -t {{.DOCKER_REGISTRY}}/zloeber/argocd:v{{.ARGOCD_VERSION}} \
+                   -t {{.DOCKER_REGISTRY}}/zloeber/argocd:latest .
     ignore_error: true
 
   push:sidecar:
@@ -144,10 +132,10 @@ tasks:
     - sh: 'which docker'
       msg: 'docker {{.PATH_ERROR}}'
     cmds:
-    - docker push docker.io/grubertech/argocd-sidecar:latest
-    - docker push docker.io/grubertech/argocd-sidecar:v{{.ARGOCD_VERSION}}
-    - docker push docker.io/grubertech/argocd:latest
-    - docker push docker.io/grubertech/argocd:v{{.ARGOCD_VERSION}}
+    - docker push {{.DOCKER_REGISTRY}}/zloeber/argocd-sidecar:latest
+    - docker push {{.DOCKER_REGISTRY}}/zloeber/argocd-sidecar:v{{.ARGOCD_VERSION}}
+    - docker push {{.DOCKER_REGISTRY}}/zloeber/argocd:latest
+    - docker push {{.DOCKER_REGISTRY}}/zloeber/argocd:v{{.ARGOCD_VERSION}}
     ignore_error: true
 
   rm:

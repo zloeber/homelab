@@ -6,7 +6,7 @@ bases:
 namespace: media
 
 patches:
-- path: https://raw.githubusercontent.com/gruberdev/homelab/main/apps/networking/tailscale/patch.yaml
+- path: https://raw.githubusercontent.com/zloeber/homelab/main/apps/networking/tailscale/patch.yaml
   target:
     kind: Deployment
     name: lidarr

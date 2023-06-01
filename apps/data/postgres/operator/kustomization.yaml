@@ -3,7 +3,7 @@ kind: Kustomization
 bases:
 - github.com/zalando/postgres-operator/manifests
 - github.com/zalando/postgres-operator/ui/manifests
-- github.com/gruberdev/homelab/apps/networking/tailscale
+- github.com/zloeber/homelab/apps/networking/tailscale
 - base/rb.yaml
 - base/cm.yaml
 - base/svc.yaml
@@ -15,7 +15,7 @@ patchesStrategicMerge:
 - overlay/cm.yaml
 namespace: databases
 patches:
-- path: https://raw.githubusercontent.com/gruberdev/homelab/main/apps/networking/tailscale/patch.yaml
+- path: https://raw.githubusercontent.com/zloeber/homelab/main/apps/networking/tailscale/patch.yaml
   target:
     kind: Deployment
     name: postgres-operator-ui
