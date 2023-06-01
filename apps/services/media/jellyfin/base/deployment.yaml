@@ -1,0 +1,88 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jellyfin
+  labels:
+    app: jellyfin
+  annotations:
+    link.argocd.argoproj.io/external-link: http://media.tv
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: jellyfin
+  template:
+    metadata:
+      labels:
+        app: jellyfin
+    spec:
+      containers:
+        - name: jellyfin
+          image: jellyfin/jellyfin:10.8.9
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8096
+            initialDelaySeconds: 60
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 30
+          envFrom:
+            - configMapRef:
+                name: jellyfin-cm
+          env:
+          - name: NVIDIA_VISIBLE_DEVICES
+            value: all
+          - name: NVIDIA_DRIVER_CAPABILITIES
+            value: all
+          ports:
+            - name: http
+              containerPort: 8096
+              protocol: TCP
+            - name: https
+              containerPort: 8920
+              protocol: TCP
+            - name: discovery
+              containerPort: 7359
+              protocol: UDP
+            - name: dnla
+              containerPort: 1900
+              protocol: UDP
+          resources:
+            limits:
+              cpu: 300m
+              memory: 400Mi
+              nvidia.com/gpu: "1"
+            requests:
+              cpu: 150m
+              memory: 200Mi
+          volumeMounts:
+            - name: movies
+              mountPath: /movies
+            - name: anime
+              mountPath: /anime
+            - name: cache
+              mountPath: /cache
+            - name: config
+              mountPath: /config
+          securityContext:
+            privileged: true
+      runtimeClassName: nvidia
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: jellyfin-storage
+        - name: movies
+          persistentVolumeClaim:
+            claimName: movie-library
+        - name: anime
+          persistentVolumeClaim:
+            claimName: anime-library
+        - name: cache
+          persistentVolumeClaim:
+            claimName: jellyfin-cache

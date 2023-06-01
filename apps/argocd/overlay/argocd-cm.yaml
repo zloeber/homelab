@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  labels:
+    app.kubernetes.io/name: argocd-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  accounts.image-updater: apiKey
+  application.resourceTrackingMethod: annotation
+  url: https://argocd.gruber.dev.br
+  statusbadge.enabled: "true"
+  statusbadge.url: "https://status.argo.gruber.dev.br/"

@@ -1,9 +1,8 @@
-desc: Python tasks
 version: "3"
 env:
-  python_version: "3.8.8"
+  python_version: "3.10.7"
   python_venv_path:
-    sh: if [[ "{{.LOCAL_BIN_PATH}}" == "" ]]; then echo ".local"; else echo "$(dirname {{.LOCAL_BIN_PATH}})"; fi
+    sh: if [[ "{{.PYTHON_VENV_PATH}}" == "" ]]; then echo "venv"; else echo "$(dirname {{.LOCAL_BIN_PATH}})"; fi
   python_bin_path: "{{.python_venv_path}}/bin"
   python_project_path: "src"
   python: "{{.python_bin_path}}/python"
@@ -97,7 +96,7 @@ tasks:
       - rm -rf docs/build
       - rm -rf *.egg-info
 
-  venv/clean:
+  venv:clean:
     desc: Remove virtual environment
     silent: true
     cmds:
@@ -132,4 +131,3 @@ tasks:
       - |
         source {{.python_venv_path}}/bin/activate
         pip3 install --editable .
-

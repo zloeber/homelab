@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: apps
+spec:
+  description: Applications Example Project
+  sourceRepos:
+  - '*'
+  destinations:
+  - namespace: apps
+    server: https://kubernetes.default.svc
+  - namespace: argocd
+    server: https://kubernetes.default.svc
+  - namespace: kube-system
+    server: https://kubernetes.default.svc
+  - namespace: databases
+    server: https://kubernetes.default.svc
+  - namespace: vault
+    server: https://kubernetes.default.svc
+  - namespace: homeassistant
+    server: https://kubernetes.default.svc
+  - namespace: unifi
+    server: https://kubernetes.default.svc
+  - namespace: services
+    server: https://kubernetes.default.svc
+  - namespace: media
+    server: https://kubernetes.default.svc
+  - namespace: rss
+    server: https://kubernetes.default.svc
+  - namespace: gaming
+    server: https://kubernetes.default.svc
+  - namespace: agones-system
+    server: https://kubernetes.default.svc
+  - namespace: default
+    server: https://kubernetes.default.svc
+  - namespace: milvus-system
+    server: https://kubernetes.default.svc
+  - namespace: chatgpt
+    server: https://kubernetes.default.svc
+  - namespace: mlops
+    server: https://kubernetes.default.svc
+  - namespace: gitea
+    server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  orphanedResources:
+    warn: false

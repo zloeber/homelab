@@ -1,0 +1,41 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-production
+  namespace: cert-manager
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: rpg.gruber@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt-production
+    solvers:
+    - selector:
+        dnsNames:
+        - '*.gruber.dev.br'
+        - gruber.dev.br
+        - onchange.gruber.dev.br
+        - ai.gruber.dev.br
+        - home.gruber.dev.br
+        - monitoring.gruber.dev.br
+        - grafana.gruber.dev.br
+        - jupyter.gruber.dev.br
+        - ha.gruber.dev.br
+        - argo.gruber.dev.br
+        - chat.gruber.dev.br
+        - status.gruber.dev.br
+        - kuma.gruber.dev.br
+        - manga.gruber.dev.br
+        - books.gruber.dev.br
+        - finance.gruber.dev.br
+        - budget.gruber.dev.br
+        - n8n.gruber.dev.br
+        - unifi.gruber.dev.br
+        - lab.gruber.dev.br
+        - g.gruber.dev.br
+      dns01:
+        cloudflare:
+          email: rpg.gruber@gmail.com
+          apiKeySecretRef:
+            name: cloudflare-api-key-secret
+            key: api-key

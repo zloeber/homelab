@@ -1,0 +1,54 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: redis
+spec:
+  project: cluster
+  source:
+    repoURL: https://github.com/OT-CONTAINER-KIT/helm-charts.git
+    targetRevision: main
+    path: charts/redis-operator/
+    helm:
+      skipCrds: true
+      releaseName: redis-operator
+      values: |
+          nodeSelector:
+            kubernetes.io/hostname: node-one
+          redisOperator:
+            imageName: quay.io/opstree/redis-operator
+            imagePullPolicy: Always
+            imageTag: v0.12.0
+            name: redis-operator
+            podAnnotations:
+              reloader.stakater.com/auto: "true"
+          replicas: 1
+          resources:
+            limits:
+              cpu: 300m
+              memory: 600Mi
+            requests:
+              cpu: 100m
+              memory: 200Mi
+          serviceAccountName: redis-operator
+          tolerateAllTaints: false
+  destination:
+    namespace: databases
+    name: in-cluster
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: true
+    syncOptions:
+    - Validate=false
+    - CreateNamespace=false
+    - PrunePropagationPolicy=background
+    - PruneLast=true
+    - ApplyOutOfSyncOnly=false
+    - Prune=true
+    retry:
+      limit: 10
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

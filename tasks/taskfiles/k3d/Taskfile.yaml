@@ -1,0 +1,53 @@
+version: "3"
+vars:
+  CYAN: tput setaf 6
+  RED: tput setaf 1
+  YELLOW: tput setaf 3
+  GREEN: tput setaf 2
+  BLUE: tput setaf 1
+  PURPLE: tput setaf 5
+  BG_B: tput setab 0
+  BOLD: tput bold
+  RESET: tput sgr0
+  CLEAR: tput reset
+  PATH_ERROR: is not installed or correctly configured in PATH.
+
+tasks:
+  start:
+    desc: Starts your local k3d cluster.
+    preconditions:
+      - sh: "which k3d"
+        msg: "k3d {{.PATH_ERROR}}"
+    summary: |
+      Creating a k3d cluster
+
+      This command ensures the cluster on k3d will
+      be created with all the correct parameters, allowing
+      for a declarative setup that requires minimal intervention
+      to work. k3d is configured to automatically create an entry
+      on your KUBECONFIG file and update it to point towards the cluster.
+
+      All commands that create resources also are specific to the cluster
+      name configured on the file ('k3d-demo'), as to avoid creating those
+      resoures on non-local clusters that may be on KUBECONFIG file as well.
+    cmds:
+      - task: :clear
+      - k3d cluster delete --config config/k3d.yaml
+      - k3d cluster create --config config/k3d.yaml
+      - task: :highlight_normal
+      - echo -e "\nYour cluster has been created. Type 'k3d cluster list' to confirm."
+      - task: :reset
+    # ignore_error: true
+
+  delete:
+    desc: Destroys your local k3d cluster.
+    preconditions:
+      - sh: "which k3d"
+        msg: "k3d {{.PATH_ERROR}}"
+    cmds:
+      - task: :clear
+      - k3d cluster delete --config config/k3d.yaml
+      - task: :highlight_normal
+      - echo -e "\nYour cluster has been destroyed."
+      - task: :reset
+    #ignore_error: true

@@ -1,0 +1,137 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-assistant
+  labels:
+    app: home-assistant
+  annotations:
+    link.argocd.argoproj.io/external-link: http://homeassistant
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: home-assistant
+  template:
+    metadata:
+      labels:
+        app: home-assistant
+    spec:
+      initContainers:
+        - name: git-sync
+          image: k8s.gcr.io/git-sync/git-sync:v3.6.1
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 65533
+          env:
+            - name: DB_USERNAME
+              valueFrom: { secretKeyRef: { name: homeuser.db-ha.credentials.postgresql.acid.zalan.do, key: username } }
+            - name: DB_PASSWORD
+              valueFrom: { secretKeyRef: { name: homeuser.db-ha.credentials.postgresql.acid.zalan.do, key: password } }
+            - name: DB_STRING
+              value: "postgresql://${DB_USERNAME}:${DB_PASSWORD}@db-ha.homeassistant.svc.cluster.local:5432/homeassistant?client_encoding=utf8&sslmode=require"
+          volumeMounts:
+          - name: temp-config
+            mountPath: /tmp/git
+          - name: ssh-key
+            mountPath: /etc/git-secret/ssh
+          - name: known-hosts
+            mountPath: /etc/git-secret/known_hosts
+          envFrom:
+            - configMapRef:
+                name: git-ha-cm
+            - secretRef:
+                name: git-vars
+                optional: true
+
+      containers:
+        - env:
+          - name: TZ
+            value: America/Sao_Paulo
+          - name: PYTHONWARNINGS
+            value: ignore:Unverified HTTPS request
+          image: homeassistant/home-assistant:2022.9
+          imagePullPolicy: IfNotPresent
+          name: home-assistant
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  ['/bin/sh', '-c', 'cp -rf /src/homeassistant/* /config']
+          ports:
+            - containerPort: 8123
+              name: api
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 350m
+              memory: 800Mi
+            requests:
+              cpu: 200m
+              memory: 500Mi
+          livenessProbe:
+            tcpSocket:
+              port: 8123
+            periodSeconds: 20
+            initialDelaySeconds: 60
+          readinessProbe:
+            tcpSocket:
+              port: 8123
+            periodSeconds: 10
+            initialDelaySeconds: 3
+          startupProbe:
+            tcpSocket:
+              port: 8123
+            timeoutSeconds: 5
+            periodSeconds: 10
+            initialDelaySeconds: 60
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: ha-secrets
+              mountPath: /config/secrets.yaml
+              subPath: secrets.yaml
+            - mountPath: /config
+              name: config-volume
+            - mountPath: /src
+              name: temp-config
+            - mountPath: /dev/ttyUSB0
+              name: dev-usb-00
+            - mountPath: /dev/ttyUSB1
+              name: dev-usb-01
+            - mountPath: /dev/serial/by-id/usb-Silicon_Labs_HubZ_Smart_Home_Controller_C130205F-if00-port0
+              name: zigbee-00
+            - mountPath: /dev/serial/by-id/usb-Silicon_Labs_HubZ_Smart_Home_Controller_C130205F-if01-port0
+              name: zigbee-01
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      volumes:
+        - name: ssh-key
+          secret:
+            secretName: ssh-key
+            defaultMode: 256
+        - name: known-hosts
+          secret:
+            secretName: known-hosts
+            defaultMode: 256
+        - name: ha-secrets
+          secret:
+            secretName: ha-secrets
+        - name: config-volume
+          persistentVolumeClaim:
+            claimName: ha-storage
+        - hostPath:
+            path: /dev/serial/by-id/usb-Silicon_Labs_HubZ_Smart_Home_Controller_C130205F-if00-port0
+          name: zigbee-00
+        - hostPath:
+            path: /dev/serial/by-id/usb-Silicon_Labs_HubZ_Smart_Home_Controller_C130205F-if01-port0
+          name: zigbee-01
+        - hostPath:
+            path: /dev/ttyUSB0
+          name: dev-usb-00
+        - hostPath:
+            path: /dev/ttyUSB1
+          name: dev-usb-01
+        - name: temp-config
+          emptyDir: {}

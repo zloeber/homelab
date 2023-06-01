@@ -1,0 +1,188 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+# ArgoCD Projects
+- base/projects/core.yaml
+- base/projects/cluster.yaml
+- base/projects/monitoring.yaml
+- base/projects/networking.yaml
+- base/projects/apps.yaml
+- base/projects/matrix.yaml
+
+# Core Applications
+- base/core/argocd.yaml
+- base/core/postgres.yaml
+- base/core/redis.yaml
+- base/core/redis-crd.yaml
+- base/core/storage.yaml
+- base/core/tailscale-operator.yaml
+- base/core/external-dns.yaml
+- base/core/nginx-ingress.yaml
+- base/core/certmanager.yaml
+- base/core/issuer.yaml
+- base/core/sealed.yaml
+# - base/core/tailscale.yaml
+# - base/core/velero.yaml
+# - base/core/private.yaml
+# - base/core/nvidia.yaml
+# - base/core/nvidia-extra.yaml
+# - base/core/democratic-csi.yaml
+# - base/core/router.yaml
+
+# Utilities
+- base/utilities/reloader.yaml
+- base/utilities/reflector.yaml
+- base/utilities/kured.yaml
+- base/utilities/kube-fledged.yaml
+- base/utilities/descheduler.yaml
+# - base/utilities/wavy.yaml
+# - base/utilities/eraser.yaml
+# - base/utilities/gfd.yaml
+# - base/utilities/chaos.yaml
+
+# Applications
+- base/apps/vault.yaml
+- base/apps/ha.yaml
+#- base/apps/wyze.yaml
+#- base/apps/unifi.yaml
+- base/apps/agones.yaml
+- base/apps/agones-crd.yaml
+- base/apps/milvus.yaml
+- base/apps/mongodb.yaml
+- base/apps/wandb.yaml
+- base/apps/mongodb-crds.yaml
+# - base/apps/adguard.yaml
+
+# Monitoring Resources
+- base/monitoring/kuma.yaml
+#- base/monitoring/unifi-poller.yaml
+- base/monitoring/kube-prom-crds.yaml
+- base/monitoring/kube-prometheus.yaml
+- base/monitoring/grafana.yaml
+# - base/monitoring/botkube.yaml
+# - base/monitoring/nvidia.yaml
+# - base/monitoring/nextdns.yaml
+# - base/monitoring/pixie.yaml
+
+# Applications/Services
+- base/services/n8n.yaml
+- base/services/onchange.yaml
+- base/services/actual.yaml
+#- base/services/jupyterlab.yaml
+- base/services/taskwarrior.yaml
+# - base/services/librex.yaml
+- base/services/gitea.yaml
+# - base/services/rss-hub.yaml
+# - base/services/feedpushr.yaml
+# - base/services/grocy.yaml
+# - base/services/wallabag.yaml
+# - base/services/metabase.yaml
+# - base/services/archivebox.yaml
+
+# ChatGPT-related Applications
+# - base/services/chatgpt/discord-bot.yaml
+#- base/services/chatgpt/memory-plugin.yaml
+
+# Media Services
+- base/services/media/mango.yaml
+- base/services/media/tanoshi.yaml
+# - base/services/media/beets.yaml
+# - base/services/media/lidarr.yaml
+# - base/services/media/bazarr.yaml
+# - base/services/media/qbittorrent.yaml
+# - base/services/media/prowlarr.yaml
+# - base/services/media/sonarr.yaml
+# - base/services/media/jellyfin.yaml
+
+# Matrix & utilities
+# - base/matrix/synapse.yaml
+# - base/matrix/element.yaml
+# - base/matrix/dbs.yaml
+# - base/matrix/proxies.yaml
+
+# # Matrix bridges
+# - base/matrix/whats.yaml
+# - base/matrix/telegram.yaml
+# - base/matrix/steam.yaml
+# - base/matrix/linkedin.yaml
+# - base/matrix/instagram.yaml
+# - base/matrix/signal.yaml
+# - base/matrix/discord.yaml
+
+# Vault plugin
+- base/cmp-plugin.yaml
+- base/repo-role.yaml
+- base/repo-rb.yaml
+
+# ArgoCD Remote Resources
+- https://github.com/zloeber/homelab/apps/networking/tailscale
+- https://github.com/zloeber/homelab/apps/networking/cloudflared
+
+- https://raw.githubusercontent.com/argoproj/argo-cd/v2.7.2/manifests/install.yaml
+
+# Image Updater
+- https://github.com/argoproj-labs/argocd-image-updater/manifests/base
+
+components:
+# Extensions controller component
+- https://github.com/argoproj-labs/argocd-extensions/manifests
+
+patchesStrategicMerge:
+- overlay/argocd-svc.yaml
+- overlay/argocd-deployment.yaml
+- overlay/argocd-cm.yaml
+- overlay/cloudflared-cm.yaml
+- overlay/argocd-rbac.yaml
+- overlay/tailscale-rb.yaml
+
+namespace: argocd
+images:
+- name: quay.io/argoproj/argocd
+  newTag: v2.7.3
+
+patches:
+- patch: |-
+    - op: add
+      path: "/spec/strategy"
+      value:
+        type: "Recreate"
+    - op: replace
+      path: "/spec/template/spec/serviceAccountName"
+      value: "argocd-server"
+  target:
+    kind: Deployment
+    name: argocd-server
+- patch: |-
+    - op: add
+      path: "/spec/template/spec/nodeSelector"
+      value:
+        kubernetes.io/hostname: node-one
+        kubernetes.io/arch: amd64
+  target:
+    kind: Deployment
+- patch: |-
+    - op: add
+      path: "/spec/template/spec/nodeSelector"
+      value:
+        kubernetes.io/hostname: node-one
+        kubernetes.io/arch: amd64
+  target:
+    kind: StatefulSet
+- patch: |-
+    - op: replace
+      path: "/spec/template/spec/volumes/0/secret/secretName"
+      value: "argo-tunnel"
+  target:
+    kind: Deployment
+    name: cloudflared
+- patch: |-
+    - op: add
+      path: "/spec/template/spec/containers/0/args/-"
+      value: "--insecure"
+  target:
+    kind: Deployment
+    name: argocd-server
+
+commonAnnotations:
+  reloader.stakater.com/auto: "true"

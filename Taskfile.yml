@@ -1,5 +1,17 @@
 version: '3'
 vars:
+  CYAN: tput setaf 6
+  RED: tput setaf 1
+  YELLOW: tput setaf 3
+  GREEN: tput setaf 2
+  BLUE: tput setaf 1
+  PURPLE: tput setaf 5
+  BG_B: tput setab 0
+  BOLD: tput bold
+  RESET: tput sgr0
+  CLEAR: tput reset
+  PATH_ERROR: is not installed or correctly configured in PATH.
+  K8S_VERSION: 1.26.1
   ROOT_PATH:
     sh: 'echo "$(cd "$( dirname -- "$0" )" && pwd)"'
   TARGET:
@@ -17,7 +29,7 @@ vars:
   GIT_LATEST_TAG:
     sh: 'git tag -l | sort -r -V | head -n 1 2>/dev/null || echo "not a git repo"'
   task_binary:
-    sh: 'echo "{{.ROOT_PATH}}/.local/bin/task"'
+    sh: 'echo "{{.LOCAL_BIN_PATH}}/task"'
   asdf_path:
     sh: if [ -d ~/.asdf ]; then echo "~/.asdf"; else echo "{{.ROOT_PATH}}/.asdf"; fi
   TERM: screen-256color
@@ -26,7 +38,7 @@ vars:
   PUBLIC_PATH: "{{.ROOT_PATH}}/public"
   CONFIG_PATH: "{{.ROOT_PATH}}/config"
   CONFIG_FILE: "{{.ROOT_PATH}}/config/{{.TARGET}}.yml"
-  PYTHON_VENV_PATH: "{{.ROOT_PATH}}/.local"
+  PYTHON_VENV_PATH: "{{.ROOT_PATH}}/venv"
   SCRIPT_PATH: "{{.ROOT_PATH}}/scripts"
   VERSION: '{{default "unknown" .GIT_LATEST_TAG}}'
   SSH_AUTHORIZED_KEY: ~/.ssh/id_rsa.pub
@@ -48,47 +60,26 @@ dotenv:
 
 
 includes:
-  git:
-    taskfile: ./tasks/taskfiles/git
-    optional: true
-  asdf:
-    taskfile: ./tasks/taskfiles/asdf
-    optional: true
-  hugo:
-    taskfile: ./tasks/taskfiles/hugo
-    optional: true
-  install:
-    taskfile: ./tasks/taskfiles/install
-    optional: true
-  pi:
-    taskfile: ./tasks/taskfiles/pi
-    optional: true
-    # ansible:
-  #   taskfile: ./tasks/taskfiles/ansible
-  #   optional: true
-    # # kube:
-  # #   taskfile: ./tasks/taskfiles/kube
-  # #   optional: true
-  # terraform:
-  #   taskfile: ./tasks/taskfiles/terraform
-  #   optional: true
-  # docker:
-  #   taskfile: ./tasks/taskfiles/docker
-  #   optional: true
-  # python:
-  #   taskfile: ./tasks/taskfiles/python
-  #   optional: true
-  # # extras:
-  # #   taskfile: ./tasks/taskfiles/extras
-  # #   optional: true
-  workspace:
-    taskfile: ./tasks/taskfiles/workspace
-    optional: true
-  workstation:
-    taskfile: ./tasks/taskfiles/workstation
-    optional: true
-
-
+  postgres: ./tasks/postgres.Taskfile.yaml
+  tailscale: ./tasks/tailscale.Taskfile.yaml
+  vault: ./tasks/vault.Taskfile.yaml
+  vultr: ./tasks/vultr.Taskfile.yaml
+  tf: ./tasks/tf.Taskfile.yaml
+  secrets: ./tasks/secrets.Taskfile.yaml
+  longhorn: ./tasks/longhorn.Taskfile.yaml
+  cluster: ./tasks/taskfiles/cluster
+  #matrix: ./tasks/matrix.Taskfile.yaml
+  argocd: ./tasks/taskfiles/argocd
+  git: ./tasks/taskfiles/git
+  asdf: ./tasks/taskfiles/asdf
+  hugo: ./tasks/taskfiles/hugo
+  install: ./tasks/taskfiles/install
+  pi: ./tasks/taskfiles/pi
+  docker: ./tasks/taskfiles/docker
+  python: ./tasks/taskfiles/python
+  workstation: ./tasks/taskfiles/workstation
+  kind: ./tasks/taskfiles/kind
+  k3d: ./tasks/taskfiles/k3d
 tasks:
   default:
     silent: true
@@ -142,4 +133,158 @@ tasks:
     silent: true
     cmds:
       - |
-        ./.local/bin/aqua install
+        {{.LOCAL_BIN_PATH}}/aqua install
+
+  clear:
+    cmds:
+      - sleep 0.1 && {{.CLEAR}}
+
+  highlight_bg:
+    cmds:
+      - |
+        sleep 0.1 && \
+        {{.CYAN}} && \
+        {{.BOLD}} && \
+        {{.BG_B}}
+  highlight_normal:
+    cmds:
+      - |
+        sleep 0.1 && \
+        {{.CYAN}} && \
+        {{.BOLD}}
+  reset:
+    cmds:
+      - |
+        sleep 0.1 && \
+        {{.RESET}}
+
+  explain:
+    desc: Explains a certain Task command more in-detail
+    cmds:
+      - task {{.CLI_ARGS}} --summary
+
+  lint:
+    desc: Performs lint testing on the YAML files in the repository using the yamllint tool to ensure proper formatting and syntax.
+    preconditions:
+      - sh: "which yamllint"
+        msg: "yamllint {{.PATH_ERROR}}"
+    cmds:
+      - yamllint -c ./.yamllint .
+
+  docs:gen:
+    preconditions:
+      - sh: 'which terraform-docs'
+        msg: 'terraform-docs {{.PATH_ERROR}}'
+    dir: terraform
+    desc: Build documentation using Terraform-docs
+    cmds:
+      - terraform-docs markdown -c .terraform-docs.yaml . --output-file README.md
+
+  local:
+    desc: local-path storage
+    preconditions:
+      - sh: "which kustomize"
+        msg: "kustomize {{.PATH_ERROR}}"
+    cmds:
+      - kustomize build "github.com/rancher/local-path-provisioner/deploy?ref=v0.0.22" | kubectl apply -f -
+
+  validate:
+    preconditions:
+      - sh: "which kubeconform"
+        msg: "kubeconform {{.PATH_ERROR}}"
+    desc: Validates your Yaml objects in the repository using Kubeconform
+    cmds:
+      # yamllint disable-line rule:line-length
+      - sleep 0.1 && {{.CYAN}} && {{.BOLD}} && {{.BG_B}} && echo -e "\nValidating Yaml files using Kubeconform..." && {{.RESET}}
+      - sleep 0.1 && {{.CYAN}} && echo -e "\nService object files" && {{.RESET}}
+      - find . -maxdepth 20 -name svc.yaml -exec kubeconform -summary -exit-on-error -ignore-missing-schemas -kubernetes-version "{{.K8S_VERSION}}" -schema-location default {} \;
+      - sleep 0.1 && {{.CYAN}} && echo -e "\nDeployment object files" && {{.RESET}}
+      - find . -maxdepth 20 -name deployment.yaml -exec kubeconform -summary -exit-on-error -ignore-missing-schemas -kubernetes-version "{{.K8S_VERSION}}" -schema-location default {} \;
+      - sleep 0.1 && {{.CYAN}} && echo -e "\nSecret object files" && {{.RESET}}
+      - find . -maxdepth 20 -name \*secret.yaml -exec kubeconform -summary -exit-on-error -ignore-missing-schemas -kubernetes-version "{{.K8S_VERSION}}" -schema-location default {} \;
+      - sleep 0.1 && {{.CYAN}} && echo -e "\nconfigMap object files" && {{.RESET}}
+      - find . -maxdepth 20 -name cm.yaml -exec kubeconform -summary -exit-on-error -ignore-missing-schemas -kubernetes-version "{{.K8S_VERSION}}" -schema-location default {} \;
+      - sleep 0.1 && {{.CYAN}} && echo -e "\nPVC object files" && {{.RESET}}
+      - find . -maxdepth 20 -name pvc.yaml -exec kubeconform -summary -exit-on-error -ignore-missing-schemas -kubernetes-version "{{.K8S_VERSION}}" -schema-location default {} \;
+      - sleep 0.1 && {{.CYAN}} && echo -e "\nPV object files" && {{.RESET}}
+      - find . -maxdepth 10 -name pv.yaml -exec kubeconform -summary -exit-on-error -ignore-missing-schemas -kubernetes-version "{{.K8S_VERSION}}" -schema-location default {} \;
+      # yamllint disable-line rule:line-length
+      # - sleep 0.1 && {{.CYAN}} && echo -e "\nCustomRoleBinding object files" && {{.RESET}}
+      # - find . -maxdepth 10 -name crb.yaml -exec kubeval {} \;
+      - sleep 0.1 && {{.CYAN}} && echo -e "\nRole object files" && {{.RESET}}
+      - find . -maxdepth 20 -name role.yaml -exec kubeconform -summary -exit-on-error -ignore-missing-schemas -kubernetes-version "{{.K8S_VERSION}}" -schema-location default {} \;
+      - sleep 0.1 && {{.CYAN}} && echo -e "\nServiceAccount object files" && {{.RESET}}
+      - find . -maxdepth 20 -name sa.yaml -exec kubeconform -summary -exit-on-error -ignore-missing-schemas -kubernetes-version "{{.K8S_VERSION}}" -schema-location default {} \;
+      - sleep 0.1 && {{.CYAN}} && echo -e "\nClusterRole object files" && {{.RESET}}
+      - find . -maxdepth 20 -name cr.yaml -exec kubeconform -summary -exit-on-error -ignore-missing-schemas -kubernetes-version "{{.K8S_VERSION}}" -schema-location default {} \;
+      - sleep 0.1 && {{.CYAN}} && echo -e "\nRole Binding object files" && {{.RESET}}
+      - find . -maxdepth 20 -name rb.yaml -exec kubeconform -summary -exit-on-error -ignore-missing-schemas -kubernetes-version "{{.K8S_VERSION}}" -schema-location default {} \;
+    silent: true
+
+  calc:
+    preconditions:
+      - sh: "which kuota-calc"
+        msg: "kuota-calc {{.PATH_ERROR}}"
+    cmds:
+      - find . -maxdepth 20 -name deployment.yaml -exec cat {} \; | kuota-calc --detailed
+      - find . -maxdepth 20 -name statefulset.yaml -exec cat {} \; | kuota-calc --detailed
+
+
+  repos:
+    desc: Adds and updates all the required Helm repositories locally.
+    preconditions:
+      - sh: "which helm"
+        msg: "helm {{.PATH_ERROR}}"
+    cmds:
+      - task: clear
+      - task: highlight_bg
+      - echo -e "This will add new repositories to your local Helm\n"
+      - task: reset
+      - helm repo add chaos-mesh https://charts.chaos-mesh.org
+      - helm repo add hashicorp https://helm.releases.hashicorp.com
+      - helm repo add bitnami https://charts.bitnami.com/bitnami
+      - helm repo add external-dns https://kubernetes-sigs.github.io/external-dns/
+      - helm repo add nginx-stable https://helm.nginx.com/stable
+      - helm repo add lwolf-charts http://charts.lwolf.org
+      - helm repo add emberstack https://emberstack.github.io/helm-charts
+      - helm repo add keyporttech https://keyporttech.github.io/helm-charts/
+      - helm repo add agones https://agones.dev/chart/stable
+      - helm repo add drone https://charts.drone.io
+      - helm repo add botkube https://charts.botkube.io
+      - helm repo add mysql-operator https://mysql.github.io/mysql-operator/
+      - helm repo add stakater https://stakater.github.io/stakater-charts
+      - helm repo add fairwinds-stable https://charts.fairwinds.com/stable
+      - helm repo add ananace-charts https://ananace.gitlab.io/charts
+      - helm repo add sealed-secrets https://bitnami-labs.github.io/sealed-secrets
+      - helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+      - helm repo add pixie-operator https://pixie-operator-charts.storage.googleapis.com
+      - helm repo add eraser https://azure.github.io/eraser/charts
+      - helm repo add vmware-tanzu https://vmware-tanzu.github.io/helm-charts
+      - task: clear
+      - echo -e "This will add new repositories to your local Helm\n"
+      - task: highlight_normal
+      - echo -e "Finished adding repositories. Updating them now.\n"
+      - task: reset
+      - helm repo update
+    ignore_error: true
+
+  dns:
+    desc: Creates the DNS entry required for the local domain to work.
+    preconditions:
+      - sh: "which hostctl"
+        msg: "hostctl {{.PATH_ERROR}}"
+    summary: |
+      Configuring Local DNS configuration through hostctl
+      This command uses hostctl to manage entries on /etc/hosts on a
+      a cross operational system compatible way. This command should work
+      on all MacOS, Windows and Linux. It adds all the '*.k8s.localhost'
+      domains to your local DNS hosts file. It also makes it easy for the
+      user to reverse those changes, avoiding pollution on your hosts
+      (or equivalent) file.
+    cmds:
+      - task: clear
+      - sleep 0.01 && {{if eq OS "windows"}}hostctl add k8s -q < config/.etchosts{{else}}sudo hostctl add k8s -q < config/.etchosts{{end}}
+      - task: highlight_normal
+      - echo -e "Added 'k8s.localhost' and related domains to your hosts file!"
+      - task: reset
+    ignore_error: true

@@ -1,0 +1,76 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prowlarr
+  labels:
+    app: prowlarr
+  annotations:
+    link.argocd.argoproj.io/external-link: http://prowlarr
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: prowlarr
+  template:
+    metadata:
+      labels:
+        app: prowlarr
+    spec:
+      containers:
+        - name: prowlarr
+          image: linuxserver/prowlarr:amd64-1.1.3
+          envFrom:
+            - configMapRef:
+                name: prowlarr-cm
+          ports:
+            - name: web
+              containerPort: 9696
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9696
+              scheme: HTTP
+          startupProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 9696
+              scheme: HTTP
+          resources:
+            limits:
+              cpu: 350m
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 256Mi
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: downloads
+              mountPath: /downloads
+            - name: music-library
+              mountPath: /music
+            - name: movies
+              mountPath: /movies
+            - name: anime
+              mountPath: /anime
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: prowlarr-storage
+        - name: music-library
+          persistentVolumeClaim:
+            claimName: music-storage
+        - name: movies
+          persistentVolumeClaim:
+            claimName: movie-library
+        - name: downloads
+          persistentVolumeClaim:
+            claimName: downloads-storage
+        - name: anime
+          persistentVolumeClaim:
+            claimName: anime-library

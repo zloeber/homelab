@@ -1,0 +1,80 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonarr
+  labels:
+    app: sonarr
+  annotations:
+    link.argocd.argoproj.io/external-link: http://sonarr
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: sonarr
+  template:
+    metadata:
+      labels:
+        app: sonarr
+    spec:
+      containers:
+        - name: sonarr
+          image: linuxserver/sonarr:amd64-3.0.9
+          envFrom:
+            - configMapRef:
+                name: sonarr-cm
+          ports:
+            - name: web
+              containerPort: 8989
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8989
+              scheme: HTTP
+          startupProbe:
+            httpGet:
+              path: /
+              port: 8989
+              scheme: HTTP
+          resources:
+            limits:
+              cpu: 500m
+              memory: 736Mi
+            requests:
+              cpu: 350m
+              memory: 512Mi
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: downloads
+              mountPath: /downloads
+            - name: downloads-cache
+              mountPath: /cache
+            - name: music-library
+              mountPath: /music
+            - name: movies
+              mountPath: /movies
+            - name: anime
+              mountPath: /anime
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: sonarr-storage
+        - name: music-library
+          persistentVolumeClaim:
+            claimName: music-storage
+        - name: movies
+          persistentVolumeClaim:
+            claimName: movie-library
+        - name: downloads
+          persistentVolumeClaim:
+            claimName: downloads-storage
+        - name: downloads-cache
+          persistentVolumeClaim:
+            claimName: cache-storage
+        - name: anime
+          persistentVolumeClaim:
+            claimName: anime-library

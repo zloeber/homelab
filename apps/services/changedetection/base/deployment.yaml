@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: change-server
+  labels:
+    app: change-server
+  annotations:
+    link.argocd.argoproj.io/external-link: http://onchange
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: change-server
+  template:
+    metadata:
+      labels:
+        app: change-server
+    spec:
+      containers:
+        - name: detector
+          image: ghcr.io/dgtlmoon/changedetection.io:latest
+          envFrom:
+            - configMapRef:
+                name: change-cm
+          ports:
+            - name: web
+              containerPort: 5000
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 50m
+              memory: 120Mi
+            limits:
+              cpu: 150m
+              memory: 350Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /datastore
+            name: app-data
+      volumes:
+        - name: app-data
+          persistentVolumeClaim:
+            claimName: change-storage

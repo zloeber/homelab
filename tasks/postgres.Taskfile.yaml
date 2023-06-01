@@ -1,0 +1,55 @@
+version: '3'
+vars:
+  CYAN: tput setaf 6
+  RED: tput setaf 1
+  YELLOW: tput setaf 3
+  GREEN: tput setaf 2
+  BLUE: tput setaf 1
+  PURPLE: tput setaf 5
+  BG_B: tput setab 0
+  BOLD: tput bold
+  RESET: tput sgr0
+  CLEAR: tput reset
+  PATH_ERROR: is not installed or correctly configured in PATH.
+
+silent: true
+
+tasks:
+  secret:roles:
+    cmds:
+      - rm config/infra-roles-secret.yaml
+      - |
+        cat << EOF > config/infra-roles-secret.yaml
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: postgresql-infrastructure-roles-new
+          namespace: databases
+        data:
+          user: $B64_POSTGRES_ADMIN_USER
+          password: $B64_POSTGRES_ADMIN_PASSWORD
+        type: Opaque
+        EOF
+      - kubectl apply -f config/infra-roles-secret.yaml
+      - rm config/infra-roles-secret.yaml
+    ignore_error: true
+
+  label:
+    cmds:
+      - kubectl label node node-one postgres-operator=enabled
+
+  decrypt:
+    cmds:
+      - echo -e "usage 'task postgres:decrypt -- {namespace}.{username}.{team}-{clustername}'\n"
+      - echo -e "$(kubectl get secret -n $(echo '{{.CLI_ARGS}}' | cut -d '.' -f 1) {{.CLI_ARGS}}.credentials.postgresql.acid.zalan.do -o 'jsonpath={.data.password}' | base64 -d)"
+    ignore_error: true
+
+  known:
+    cmds:
+      - echo -e "Home assistant:"
+      - echo "$(kubectl get secret -n homeassistant homeuser.apps-ha-db.credentials.postgresql.acid.zalan.do -o 'jsonpath={.data.password}' | base64 -d)"
+      - echo -e "Drone:"
+      - echo "$(kubectl get secret -n drone ciuser.apps-drone-db.credentials.postgresql.acid.zalan.do -o 'jsonpath={.data.password}' | base64 -d)"
+      - echo -e "n8n:"
+      - echo "$(kubectl get secret -n services automateuser.apps-n8n-db.credentials.postgresql.acid.zalan.do -o 'jsonpath={.data.password}' | base64 -d)"
+    ignore_error: true

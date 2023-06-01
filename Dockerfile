@@ -5,8 +5,15 @@ USER app
 WORKDIR /app
 
 ADD . . 
-RUN git clone https://github.com/asdf-vm/asdf.git ~/.asdf
-RUN source ~/.asdf/asdf.sh && \
-    ~/.asdf/bin/asdf plugin-add task \
-    task asdf:init && \
-    ls -al
+RUN \
+    ls -al ./
+    #  && \
+    # git clone https://github.com/asdf-vm/asdf.git ./.asdf && \
+    # source ./.asdf/asdf.sh && \
+    # ls -al ./
+#    ~/asdf/bin/asdf plugin-add task
+
+# RUN task asdf:init && \
+#     task asdf:bootstrap && \
+#     task aqua:sync
+
