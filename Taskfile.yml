@@ -295,23 +295,30 @@ tasks:
     cmds:
       - task: docker:login
 
-  start:
-    desc: Start a full local deployment to k3d
-    cmds:
-      - task: k3d:delete
-      - task: k3d:start
-      - task: local
-      - task: argocd:repo
-      - task: argocd:secret
-      - task: argocd:build
-      - task: argocd:deploy
+  # start:
+  #   desc: Start a full local deployment to k3d
+  #   cmds:
+  #     - task: k3d:delete
+  #     - task: k3d:start
+  #     - task: local
+  #     - task: argocd:repo
+  #     - task: argocd:secret
+  #     - task: argocd:build
+  #     - task: argocd:deploy
 
-  cluster:
+  start:
     desc: start local cluster via k3d
     cmds:
       - |
-        make -C metal
-  
+        make -C metal cluster env=dev
+        make -C bootstrap
+
+  stop:
+    desc: stop local cluster
+    cmds:
+      - |
+        make clean
+
   config:
     desc: Update the configuration
     cmds:
