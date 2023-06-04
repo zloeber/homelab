@@ -8,7 +8,7 @@ I will use this to explore various tools and maintain several projects and explo
 
 This project has so many disparate scripts and tasks that it may be hard to find the common elements among them. I'll state them here for clarity:
 
-- Most tasks are rootless. As such, cli apps are usually installed to `./.local/bin` or `~/.local/bin`. Aqua will use `${HOME}/.local/share/aquaproj-aqua/bin` by default for its binaries. You are responsible for your own `PATH` var. So ensure your `.zshrc` or `.profile` or `.bashrc` files (look for the `export PATH="./venv/bin:${PATH}"` command).
+- Most tasks are rootless. As such, cli apps are usually installed to `./venv/bin` or `~/venv/bin`. Aqua will use `${HOME}/venv/share/aquaproj-aqua/bin` by default for its binaries. You are responsible for your own `PATH` var. So ensure your `.zshrc` or `.profile` or `.bashrc` files (look for the `export PATH="./venv/bin:${PATH}"` command).
 
 - I lean towards readable declarative yaml configurations for most configurations where terraform is not sufficient. 
 - Typically, I will search for and install applications via aqua-cli (`aqua g -i` then `aqua install`) and use asdf-vm to manage programming language installs. 

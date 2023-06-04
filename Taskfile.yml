@@ -290,10 +290,31 @@ tasks:
       - task: reset
     ignore_error: true
   
+  login:
+    desc: Login to various services (run once)
+    cmds:
+      - task: docker:login
+
   start:
     desc: Start a full local deployment to k3d
     cmds:
       - task: k3d:delete
       - task: k3d:start
-      - task: repo
+      - task: local
+      - task: argocd:repo
+      - task: argocd:secret
+      - task: argocd:build
       - task: argocd:deploy
+
+  cluster:
+    desc: start local cluster via k3d
+    cmds:
+      - |
+        make -C metal
+  
+  config:
+    desc: Update the configuration
+    cmds:
+      - |
+        source {{.PYTHON_VENV_PATH}}/bin/activate
+        python ./scripts/configure

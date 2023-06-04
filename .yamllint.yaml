@@ -1,0 +1,31 @@
+ignore: |
+  .autodoc/
+  .cache/
+  .common/
+  .git/
+  .husky/
+  .modules/
+  .npm/
+  .pnpm-store/
+  .shared/
+  .task/
+  .venv/
+  .vscode/
+  .tox
+  .travis.yml
+  *.hbs.yml
+  build/
+  dist/
+  node_modules/
+  pnpm-lock.yaml
+  roles/
+  venv/
+  workspace/
+  templates/
+  mkdocs.yml
+
+extends: default
+
+rules:
+  document-start: disable
+  line-length: disable

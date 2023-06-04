@@ -1,0 +1,5 @@
+jinja2
+kubernetes
+mkdocs-material
+netaddr
+rich

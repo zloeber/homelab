@@ -3,16 +3,25 @@
 SHELL:=/bin/bash
 .DEFAULT_GOAL:=help
 
+.POSIX:
+.PHONY: *
+.EXPORT_ALL_VARIABLES:
+
+KUBECONFIG = $(shell pwd)/metal/kubeconfig.yaml
+KUBE_CONFIG_PATH = $(KUBECONFIG)
+
+
 ROOT_PATH := $(abspath $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST))))))
 SSH_AUTHORIZED_KEY?=~/.ssh/id_rsa.pub
 #SSH_HOST_KEY?=~/.ssh/$(shell hostname)-id_rsa.pub
-TASKFILE_PATH?=$(ROOT_PATH)/.local/bin
+
 
 PROFILE ?= default
 CONFIG_FILE ?= $(ROOT_PATH)/$(PROFILE).yml
 SKIP_ERRORS ?= 2>/dev/null || true
-HOME_PATH := $(ROOT_PATH)/.local
-PYTHON_VENV_PATH := $(ROOT_PATH)/.local
+HOME_PATH := $(ROOT_PATH)/venv
+TASKFILE_PATH?=$(HOME_PATH)/bin
+PYTHON_VENV_PATH := $(ROOT_PATH)/venv
 APP_PATH := $(HOME_PATH)/apps
 PROJECT_BIN_PATH := $(HOME_PATH)/bin
 SCRIPT_PATH ?= $(ROOT_PATH)/scripts
@@ -94,20 +103,8 @@ endif
 
 WORKSPACE_PATH ?= $(WORKSPACE)/$(PROJECT)
 
-# Gitlab
 GIT_COMMIT:=$(shell git rev-parse --short=8 HEAD 2>/dev/null || echo local)
 GIT_BRANCH:=$(shell git branch --show-current 2>/dev/null || echo unknown)
-
-#GITLAB_URL:=https://git.gitlab.com
-#GITLAB_PAGES_URL:=https://idam-pxm.gitlabpages.nml.com/vault-ops/vault-controller
-#GITLAB_PATH ?= $(shell git remote get-url origin 2>/dev/null | sed -Ee 's/.*:(.+)\.git/\1/')
-GITLAB_UI_PATH ?= $(GITLAB_URL)/$(GITLAB_PATH)
-GITLAB_API_PATH ?= $(GITLAB_URL)/api/v4
-
-#GITLAB_PATH ?= idam-pxm/tools/util-umbrella
-#GITLAB_UI_PATH ?= https://git.nmlv.nml.com/$(GITLAB_PATH)
-#GITLAB_API_PATH ?= https://git.nmlv.nml.com/api/v4
-#GITLAB_FILES:=$(shell find $(ROOT_PATH)/$(WORKSPACE_PATH) -type f \( -iname ".gitlab-ci.yml" \) -exec echo {} \;)
 
 SEDOPTION=
 ifeq ($(OS),darwin)
@@ -128,7 +125,6 @@ update: .update/self workspace/update ## Shortcut for workspace/update
 
 .PHONY: deps
 deps: .dep/apt .dep/ssh .dep/taskfile .dep/jq .dep/yq ## Install dependant apps
-# #deps: .dep/githubapps .dep/yq .dep/vault .dep/jq .dep/vaultlogin ## Install dependant apps
 
 .PHONY: venv
 venv: ## Start virtual environment
@@ -180,27 +176,6 @@ ifeq (,$(wildcard $(task)))
 endif
 	@$(task)
 
-# taskfile:=$(PROJECT_BIN_PATH)/task
-# .PHONY: .dep/taskfile
-# .dep/taskfile: ## Install task binary
-# ifeq (,$(wildcard $(taskfile)))
-# 	@sh -c "$$(curl --location https://taskfile.dev/install.sh)" -- -b $(PROJECT_BIN_PATH)
-# endif
-# 	@echo "Requirement Installed: $(taskfile)"
-
-# .PHONY: .dep/zarf
-# .dep/zarf: ## Install zarf
-# ZARF_VERSION ?= 0.15.1
-# zarf := $(PROJECT_BIN_PATH)/zarf
-# ifeq (,$(wildcard $(zarf)))
-# 	@mkdir -p $(PROJECT_BIN_PATH)
-# 	@curl --retry 3 --retry-delay 5 --fail -sSL \
-# 		-o  $(PROJECT_BIN_PATH)/zarf https://zarf-public.s3-us-gov-west-1.amazonaws.com/release/v$(ZARF_VERSION)/zarf-mac-intel
-# 	@chmod +x $(PROJECT_BIN_PATH)/zarf
-# endif
-# 	@$(zarf)
-
-
 .PHONY: .dep/apt
 .dep/apt:
 	sudo apt -y install openssh-server ntp ansible && sudo systemctl enable ssh && sudo systemctl start ssh
@@ -221,39 +196,28 @@ ifeq (,$(wildcard $(TASKFILE_PATH)/task))
 endif
 	@true
 
-.PHONY: gitlab/lint
-gitlab/lint: ## lint current .gitlab-ci.yml file
-	@LINT_REPORT=`$(jq) --null-input --arg yaml "$$(<$(ROOT_PATH)/.gitlab-ci.yml)" '.content=$$yaml' \
-		| curl  -s '$(GITLAB_API_PATH)/ci/lint?include_merged_yaml=true' \
-		--header 'Content-Type: application/json' \
-		--data @-` && echo $$LINT_REPORT | jq . --raw-output
-
-.PHONY: gitlab/ui
-gitlab/ui: ## Open gitlab ui for current project
-	@open $(GITLAB_UI_PATH)
-
-search/workspace/%: ## Search workspace for references to %
-	find $(WORKSPACE_PATH) -name "*.tf" -print0 -type f -not -path "**/.local/*" | xargs -I {}  -0 grep -H --color -e "$(subst search/workspace/,,$@)" "{}"
+# search/workspace/%: ## Search workspace for references to %
+# 	find $(WORKSPACE_PATH) -name "*.tf" -print0 -type f -not -path "**/.local/*" | xargs -I {}  -0 grep -H --color -e "$(subst search/workspace/,,$@)" "{}"
 
 # .PHONY: show/vaultmodules
 # show/vaultmodules: ## Show hvault tagged modules
 # 	@$(MAKE) -S -C $(WORKSPACE_PATH)/vault_modules show/module/releases
 
-.PHONY: .dep/dive
-.dep/dive: ## Install docker image exploration tool, dive
-ifeq (,$(wildcard $(dive)))
-	@$(MAKE) --no-print-directory -C $(APP_PATH)/githubapp auto wagoodman/dive INSTALL_PATH=$(PROJECT_BIN_PATH)
-endif
+# .PHONY: .dep/dive
+# .dep/dive: ## Install docker image exploration tool, dive
+# ifeq (,$(wildcard $(dive)))
+# 	@$(MAKE) --no-print-directory -C $(APP_PATH)/githubapp auto wagoodman/dive INSTALL_PATH=$(PROJECT_BIN_PATH)
+# endif
 
-.PHONY: docker/dive
-docker/dive: .dep/dive ## Examine the image with the dive
-	$(dive) $(DOCKER_IMAGE):local
+# .PHONY: docker/dive
+# docker/dive: .dep/dive ## Examine the image with the dive
+# 	$(dive) $(DOCKER_IMAGE):local
 
-.PHONY: backup/state
-backup/state: ## Backup the state for an environment
-	@mkdir -p $(HOME_PATH)/$(ENVIRONMENT)/state
-	@aws --profile $(AWS_PROFILE) s3 sync s3://nwm-vault-${ENV}-tf-state $(HOME_PATH)/$(ENVIRONMENT)/state
-	@echo synced reports to :$(HOME_PATH)/$(ENVIRONMENT)/state
+# .PHONY: backup/state
+# backup/state: ## Backup the state for an environment
+# 	@mkdir -p $(HOME_PATH)/$(ENVIRONMENT)/state
+# 	@aws --profile $(AWS_PROFILE) s3 sync s3://${ENV}-tf-state $(HOME_PATH)/$(ENVIRONMENT)/state
+# 	@echo synced reports to :$(HOME_PATH)/$(ENVIRONMENT)/state
 
 
 .PHONY: git/lint
@@ -269,17 +233,6 @@ find/ref: ## Find ref statements
 .PHONY: update/ref
 update/ref: ## Update ref statements
 	find $(WORKSPACE_PATH) -type f  \( -iname ".gitlab-ci.yml" \) -exec sed -i 's/ref:.+/ref: $(CICD_VERSION)/g' {} \;
-#	find $(WORKSPACE_PATH) \( -type d -name .git -prune -o -type f -iname ".gitlab-ci.yml" \) -print0 | xargs -0 sed -i 's/ref:.+/ref: $(CICD_VERSION)/g'
-#	$(foreach gitlabfile, $(GITLAB_FILES), sed $(SEDOPTION) 's/ref:.+/ref: $(CICD_VERSION)/' $(gitlabfile);)
-
-.PHONY: vault/login
-vault/login: ## Login via vault and oidc
-	$(vault) vault login -method=oidc -token-only -no-store 2>&1 | tail -1
-
-.PHONY: vault/agent
-vault/agent: ## Authenticate with vault agent
-	vault agent -config=$(ROOT_PATH)/config/environments/vault-agent.$(ENVIRONMENT).hcl
-	@cat $(ROOT_PATH)/.local/VaultToken
 
 
 .PHONY: git/setupstream
@@ -288,3 +241,57 @@ git/setupstream: ## Set the current git branch upstream to a branch by the same 
 
 %: ## A parameter
 	@true
+
+deploy: metal bootstrap smoke-test ## Default kube deployment
+
+configure: ## Configure the current repo
+	./scripts/configure
+	git status
+
+metal: ## Deploy metal (Stage 1)
+	make -C metal
+
+bootstrap: ## Deploy bootstrap (Stage 2)
+	make -C bootstrap
+
+external: ## Deploy external (Stage 3)
+	make -C external
+
+smoke-test: ## Run smoke tests
+	make -C test filter=Smoke
+
+post-install: ## Run post-install hacks
+	@./scripts/hacks
+
+tools: ## Create and run a tools container environment
+	@docker run \
+		--rm \
+		--interactive \
+		--tty \
+		--network host \
+		--env "KUBECONFIG=${KUBECONFIG}" \
+		--volume "/var/run/docker.sock:/var/run/docker.sock" \
+		--volume $(shell pwd):$(shell pwd) \
+		--volume ${HOME}/.ssh:/root/.ssh \
+		--volume ${HOME}/.terraform.d:/root/.terraform.d \
+		--volume homelab-tools-cache:/root/.cache \
+		--volume homelab-tools-nix:/nix \
+		--workdir $(shell pwd) \
+		nixos/nix nix-shell
+
+test: ## Run all tests
+	make -C test
+
+clean: ## Clean up
+	docker compose --project-directory ./metal/roles/pxe_server/files down
+	k3d cluster delete homelab-dev
+
+dev: ## Deploy dev environment
+	make -C metal cluster env=dev
+	make -C bootstrap
+
+docs: ## Serve docs
+	mkdocs serve
+
+git-hooks: ## Install git hooks
+	pre-commit install

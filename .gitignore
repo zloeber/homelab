@@ -21,3 +21,12 @@ workspaces/default/*/
 venv
 venv/
 .metagit
+.venv/
+book/
+
+*.iso
+*.log
+*.png
+*.tgz
+*kubeconfig.yaml
+Chart.lock
