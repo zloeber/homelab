@@ -8,7 +8,7 @@ spec:
   project: core
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/networking/certmanager
+    path: appset1/networking/certmanager
     targetRevision: main
   destination:
     namespace: cert-manager

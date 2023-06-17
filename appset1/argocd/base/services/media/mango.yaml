@@ -8,7 +8,7 @@ spec:
   project: apps
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/services/media/mango
+    path: appset1/services/media/mango
     targetRevision: main
   destination:
     namespace: media

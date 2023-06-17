@@ -6,7 +6,7 @@ spec:
   project: matrix
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/matrix/bridges/telegram
+    path: appset1/matrix/bridges/telegram
     targetRevision: main
   destination:
     namespace: matrix

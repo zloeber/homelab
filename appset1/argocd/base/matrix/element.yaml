@@ -6,7 +6,7 @@ spec:
   project: matrix
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/matrix/element
+    path: appset1/matrix/element
     targetRevision: main
   destination:
     namespace: matrix

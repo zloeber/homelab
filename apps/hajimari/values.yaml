@@ -27,7 +27,7 @@ hajimari:
           - name: Documentation
             url: https://homelab.127-0-0-1.nip.io
           - name: Public GitHub repository
-            url: https://github.com/khuedoan/homelab
+            url: https://github.com/zloeber/homelab
       - group: Managed services
         bookmarks:
           - name: Terraform Cloud

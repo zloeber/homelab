@@ -74,7 +74,7 @@ tasks:
         echo "tool_versions: ${tool_versions}"
         if test -e "${tool_versions}"; then
           source {{.asdf_path}}/asdf.sh
-          $(cut -d' ' -f1 {{.ROOT_PATH}}/.tool-versions|xargs -i asdf plugin add  {}) || true
+          $(cut -d' ' -f1 {{.ROOT_PATH}}/.tool-versions | xargs -i asdf plugin add  {}) || true
           asdf install
         else
           echo "tool_versions does not exist: ${tool_versions}"

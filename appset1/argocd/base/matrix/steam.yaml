@@ -6,7 +6,7 @@ spec:
   project: matrix
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/matrix/bridges/steam
+    path: appset1/matrix/bridges/steam
     targetRevision: main
   destination:
     namespace: matrix

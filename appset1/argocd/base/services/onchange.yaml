@@ -8,7 +8,7 @@ spec:
   project: apps
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/services/changedetection
+    path: appset1/services/changedetection
     targetRevision: main
   destination:
     namespace: services

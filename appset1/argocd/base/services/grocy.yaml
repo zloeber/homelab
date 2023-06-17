@@ -8,7 +8,7 @@ spec:
   project: apps
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/services/grocy
+    path: appset1/services/grocy
     targetRevision: main
   destination:
     namespace: services

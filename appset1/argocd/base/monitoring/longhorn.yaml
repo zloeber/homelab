@@ -6,7 +6,7 @@ spec:
   project: monitoring
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/monitoring/longhorn
+    path: appset1/monitoring/longhorn
     targetRevision: main
   destination:
     namespace: longhorn-system

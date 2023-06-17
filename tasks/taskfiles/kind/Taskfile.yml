@@ -1,10 +1,10 @@
 version: '3'
 vars:
-  LOCAL_BIN_PATH: '{{default "./.local/bin" .PROJECT_BIN_PATH}}'
-  PROJECT_BIN_BASE_PATH:
-    sh: "dirname {{.PROJECT_BIN_PATH}}"
-  CONFIG_PATH: '{{default "{{.ROOT_PATH}}/config" .CONFIG_PATH}}'
-  KUBECTL_VERSION: '{{default "1.20.1" .KUBECTL_VERSION}}'
+  # LOCAL_BIN_PATH: '{{default "./.local/bin" .PROJECT_BIN_PATH}}'
+  # PROJECT_BIN_BASE_PATH:
+  #   sh: "dirname {{.PROJECT_BIN_PATH}}"
+  # CONFIG_PATH: '{{default "{{.ROOT_PATH}}/config" .CONFIG_PATH}}'
+  # KUBECTL_VERSION: '{{default "1.20.1" .KUBECTL_VERSION}}'
   kubectl: '{{.PROJECT_BIN_PATH}}/kubectl'
   KUBECONFIG: '{{.PROJECT_BIN_BASE_PATH}}/kubeconfig'
   KUBE_DISTRIBUTION: '{{default "kind" .KUBE_DISTRIBUTION}}'

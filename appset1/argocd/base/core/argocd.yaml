@@ -8,7 +8,7 @@ spec:
   project: core
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/argocd
+    path: appset1/argocd
     targetRevision: main
   destination:
     namespace: argocd

@@ -21,15 +21,14 @@ vars:
   PROJECT:
     sh: 'echo "$(basename {{.ROOT_PATH}})"'
   LOCAL_BIN_PATH:
-    sh: 'echo "{{.ROOT_PATH}}/.local/bin"'
+    sh: 'echo "{{.ROOT_PATH}}/venv/bin"'
   BUILD_DATE:
     sh: "date '+%Y-%m-%d-%H:%M:%S'"
   BUILD_DATE_SHORT:
     sh: "date '+%Y-%m-%d-%H%M%S'"
   GIT_LATEST_TAG:
     sh: 'git tag -l | sort -r -V | head -n 1 2>/dev/null || echo "not a git repo"'
-  task_binary:
-    sh: 'echo "{{.LOCAL_BIN_PATH}}/task"'
+  task_binary: "{{.LOCAL_BIN_PATH}}/task"
   asdf_path:
     sh: if [ -d ~/.asdf ]; then echo "~/.asdf"; else echo "{{.ROOT_PATH}}/.asdf"; fi
   TERM: screen-256color
@@ -47,6 +46,7 @@ vars:
   WORKSPACE: "default"
   WORKSPACE_PATH: "{{.ROOT_PATH}}/workspaces/{{.WORKSPACE}}"
   WORKSPACE_CONFIG: "{{.CONFIG_PATH}}/workspace.vendir.{{.WORKSPACE}}.yml"
+  LC_ALL: "C.UTF-8"
 # env:
 #   AUTHOR_NAME: '{{default "{{.AUTHOR_NAME}}" "git" }}'
 #   AUTHOR_EMAIL: '{{default "{{.AUTHOR_EMAIL}}" "git@nowhere" }}'
@@ -126,6 +126,19 @@ tasks:
         {{.task_binary}} $taskitem;
         echo "";
       done
+
+  secrets:init:
+    desc: Initialize default .SECRET file
+    silent: true
+    cmds:
+      - |
+        echo "GH_USER=zloeber" > .SECRET
+        echo "GH_PASS=${GH_PASS}" >> .SECRET
+        echo "GH_TOKEN=${GH_TOKEN}" >> .SECRET
+        echo "GH_OWNER=zloeber" >> .SECRET
+        echo "GIT_TOKEN=${GIT_TOKEN}" >> .SECRET
+    status:
+      - test .SECRET
 
   aqua:sync:
     desc: Attempt to install aqua cli
@@ -295,16 +308,19 @@ tasks:
     cmds:
       - task: docker:login
 
-  # start:
-  #   desc: Start a full local deployment to k3d
-  #   cmds:
-  #     - task: k3d:delete
-  #     - task: k3d:start
-  #     - task: local
-  #     - task: argocd:repo
-  #     - task: argocd:secret
-  #     - task: argocd:build
-  #     - task: argocd:deploy
+  start:k3d:
+    desc: Start a full local deployment to k3d
+    cmds:
+      - task: k3d:delete
+      - task: k3d:start
+      - task: local
+      - task: k3d:config:export
+      - task: argocd:build:sidecar
+      - task: argocd:push:sidecar
+      # - task: argocd:repo
+      # - task: argocd:secret
+      # - task: argocd:build
+      # - task: argocd:deploy
 
   start:
     desc: start local cluster via k3d

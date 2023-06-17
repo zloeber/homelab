@@ -17,6 +17,7 @@ vars:
   GH_PUBLIC_DEPLOY_REPO: homelab
   GH_PRIVATE_DEPLOY_REPO: homelab-private
   DOCKER_REGISTRY: cloud.canister.io:5000
+  ARGOCD_APPSET: appset1
 
 silent: true
 
@@ -93,7 +94,7 @@ tasks:
 
   deploy:
     desc: Installs ArgoCD resources manually on the local cluster
-    dir: apps/argocd
+    dir: "{{.ARGOCD_APPSET}}/argocd"
     preconditions:
     - sh: 'which kustomize'
       msg: 'kustomize {{.PATH_ERROR}}'
@@ -117,7 +118,7 @@ tasks:
     preconditions:
     - sh: 'which docker'
       msg: 'docker {{.PATH_ERROR}}'
-    dir: apps/argocd
+    dir: "{{.ARGOCD_APPSET}}/argocd"
     cmds:
     - |
       docker build -t {{.DOCKER_REGISTRY}}/zloeber/argocd-sidecar:latest \
@@ -127,7 +128,7 @@ tasks:
     ignore_error: true
 
   push:sidecar:
-    dir: apps/argocd
+    dir: "{{.ARGOCD_APPSET}}/argocd"
     preconditions:
     - sh: 'which docker'
       msg: 'docker {{.PATH_ERROR}}'
@@ -139,7 +140,7 @@ tasks:
     ignore_error: true
 
   rm:
-    dir: apps/argocd
+    dir: "{{.ARGOCD_APPSET}}/argocd"
     preconditions:
     - sh: 'which kustomize'
       msg: 'kustomize {{.PATH_ERROR}}'
@@ -196,3 +197,24 @@ tasks:
     cmds:
     - task: login
     - task: refresh
+
+  autopilot:install:
+    desc: Install argocd-autopilot cli tool
+    cmds:
+      - |
+        VERSION=$(curl --silent "https://api.github.com/repos/argoproj-labs/argocd-autopilot/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+        curl -L --output - https://github.com/argoproj-labs/argocd-autopilot/releases/download/$VERSION/argocd-autopilot-linux-amd64.tar.gz | tar zx
+        mv ./argocd-autopilot-* {{.LOCAL_BIN_PATH}}/argocd-autopilot
+    status:
+      - type argocd-autopilot &> /dev/null
+
+  autopilot:bootstrap:
+    desc: Bootstrap argocd cluster and git repo
+    preconditions:
+    - sh: 'which argocd-autopilot'
+      msg: 'argocd-autopilot {{.PATH_ERROR}}'
+    vars:
+      GIT_REPO: https://github.com/zloeber/k3d-home-autopilot
+    cmds:
+      - |
+        argocd-autopilot repo bootstrap --repo {{.GIT_REPO}}

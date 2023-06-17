@@ -6,7 +6,7 @@ spec:
   project: cluster
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/data/storage
+    path: appset1/data/storage
     targetRevision: main
   destination:
     name: in-cluster

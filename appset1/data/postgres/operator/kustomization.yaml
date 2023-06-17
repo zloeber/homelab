@@ -3,7 +3,7 @@ kind: Kustomization
 bases:
 - github.com/zalando/postgres-operator/manifests
 - github.com/zalando/postgres-operator/ui/manifests
-- github.com/zloeber/homelab/apps/networking/tailscale
+- github.com/zloeber/homelab/appset1/networking/tailscale
 - base/rb.yaml
 - base/cm.yaml
 - base/svc.yaml

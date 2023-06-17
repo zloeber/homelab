@@ -6,7 +6,7 @@ spec:
   project: matrix
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/matrix/proxies
+    path: appset1/matrix/proxies
     targetRevision: main
   destination:
     namespace: matrix

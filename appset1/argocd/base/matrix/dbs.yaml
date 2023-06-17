@@ -6,7 +6,7 @@ spec:
   project: matrix
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/matrix/databases
+    path: appset1/matrix/databases
     targetRevision: main
   destination:
     namespace: matrix

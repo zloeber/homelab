@@ -6,7 +6,7 @@ spec:
   project: matrix
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/matrix/bridges/instagram
+    path: appset1/matrix/bridges/instagram
     targetRevision: main
   destination:
     namespace: matrix

@@ -8,7 +8,7 @@ spec:
   project: monitoring
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/monitoring/uptime-kuma
+    path: appset1/monitoring/uptime-kuma
     targetRevision: main
   destination:
     namespace: monitoring

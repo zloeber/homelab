@@ -14,7 +14,7 @@ import urllib
 from rich.console import Console
 from kubernetes import client, config
 
-# https://git.khuedoan.com/user/settings/applications
+# https://git.loeber.live/user/settings/applications
 # Doing this properly inside the cluster requires:
 # - Kubernetes service account
 # - Vault Kubernetes auth

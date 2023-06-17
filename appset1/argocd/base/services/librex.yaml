@@ -8,7 +8,7 @@ spec:
   project: apps
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/services/librex
+    path: appset1/services/librex
     targetRevision: main
   destination:
     namespace: services

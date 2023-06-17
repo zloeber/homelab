@@ -6,7 +6,7 @@ spec:
   project: cluster
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/networking/tailscale
+    path: appset1/networking/tailscale
     targetRevision: main
   destination:
     namespace: kube-system

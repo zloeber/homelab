@@ -12,7 +12,7 @@ spec:
   project: apps
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/services/n8n
+    path: appset1/services/n8n
     targetRevision: main
   destination:
     namespace: services

@@ -8,7 +8,7 @@ spec:
   project: cluster
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/networking/tailscale/operator
+    path: appset1/networking/tailscale/operator
     targetRevision: main
   destination:
     namespace: tailscale

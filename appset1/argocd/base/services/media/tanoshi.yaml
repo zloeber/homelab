@@ -8,7 +8,7 @@ spec:
   project: apps
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/services/media/tanoshi
+    path: appset1/services/media/tanoshi
     targetRevision: main
   destination:
     namespace: media

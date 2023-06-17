@@ -6,7 +6,7 @@ spec:
   project: matrix
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/matrix/bridges/linkedin
+    path: appset1/matrix/bridges/linkedin
     targetRevision: main
   destination:
     namespace: matrix

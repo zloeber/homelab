@@ -30,3 +30,4 @@ book/
 *.tgz
 *kubeconfig.yaml
 Chart.lock
+.SECRET

@@ -8,7 +8,7 @@ spec:
   project: monitoring
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/monitoring/nextdns
+    path: appset1/monitoring/nextdns
     targetRevision: main
   destination:
     namespace: monitoring

@@ -6,7 +6,7 @@ spec:
   project: cluster
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/monitoring/sealed-secrets
+    path: appset1/monitoring/sealed-secrets
     targetRevision: main
   destination:
     namespace: kube-system

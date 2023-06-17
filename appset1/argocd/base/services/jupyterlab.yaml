@@ -8,7 +8,7 @@ spec:
   project: apps
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/services/jupyter
+    path: appset1/services/jupyter
     targetRevision: main
   destination:
     namespace: mlops

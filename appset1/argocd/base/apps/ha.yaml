@@ -8,7 +8,7 @@ spec:
   project: apps
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/home/ha
+    path: appset1/home/ha
     targetRevision: main
   destination:
     namespace: homeassistant

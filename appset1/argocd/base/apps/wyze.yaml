@@ -14,7 +14,7 @@ spec:
   project: apps
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/home/wyze
+    path: appset1/home/wyze
     targetRevision: main
   destination:
     namespace: homeassistant

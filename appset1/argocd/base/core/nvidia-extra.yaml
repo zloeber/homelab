@@ -6,7 +6,7 @@ spec:
   project: core
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/monitoring/nvidia
+    path: appset1/monitoring/nvidia
     targetRevision: main
   destination:
     namespace: kube-system

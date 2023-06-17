@@ -8,7 +8,7 @@ spec:
   project: cluster
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/monitoring/kured
+    path: appset1/monitoring/kured
     targetRevision: main
   destination:
     namespace: kube-system

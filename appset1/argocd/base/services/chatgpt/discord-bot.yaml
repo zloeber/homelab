@@ -8,7 +8,7 @@ spec:
   project: apps
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/services/chatgpt/discord-bot
+    path: appset1/services/chatgpt/discord-bot
     targetRevision: main
   destination:
     namespace: chatgpt

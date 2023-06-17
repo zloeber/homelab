@@ -8,7 +8,7 @@ spec:
   project: services
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/data/metabase
+    path: appset1/data/metabase
     targetRevision: main
   destination:
     namespace: services

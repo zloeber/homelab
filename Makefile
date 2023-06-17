@@ -9,6 +9,7 @@ SHELL:=/bin/bash
 
 KUBECONFIG = $(shell pwd)/metal/kubeconfig.yaml
 KUBE_CONFIG_PATH = $(KUBECONFIG)
+LC_ALL:=C.UTF-8
 
 
 ROOT_PATH := $(abspath $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST))))))

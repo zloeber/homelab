@@ -51,3 +51,14 @@ tasks:
       - echo -e "\nYour cluster has been destroyed."
       - task: :reset
     #ignore_error: true
+  
+  config:export:
+    desc: Show and save current cluster configuration to ~/.k3d/kubeconfig
+    preconditions:
+      - sh: "which k3d"
+        msg: "k3d {{.PATH_ERROR}}"
+    cmds:
+      - mkdir -p ~/.k3d/kubeconfig
+      - echo $(k3d kubeconfig get homelab-dev > ~/.k3d/kubeconfig
+      - k3d kubeconfig get homelab-dev
+

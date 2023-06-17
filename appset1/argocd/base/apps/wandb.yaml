@@ -6,7 +6,7 @@ spec:
   project: apps
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/services/wandb
+    path: appset1/services/wandb
     targetRevision: main
   destination:
     namespace: mlops

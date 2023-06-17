@@ -15,31 +15,31 @@ from selenium import webdriver
 apps = [
     {
         'name': 'home',
-        'url': 'https://home.khuedoan.com'
+        'url': 'https://home.loeber.live'
     },
     {
         'name': 'gitea',
-        'url': 'https://git.khuedoan.com/ops/homelab'
+        'url': 'https://git.loeber.live/ops/homelab'
     },
     {
         'name': 'argocd',
-        'url': 'https://argocd.khuedoan.com/applications/root'
+        'url': 'https://argocd.loeber.live/applications/root'
     },
     {
         'name': 'vault',
-        'url': 'https://vault.khuedoan.com/ui/vault/secrets'
+        'url': 'https://vault.loeber.live/ui/vault/secrets'
     },
     {
         'name': 'tekton',
-        'url': 'https://tekton.khuedoan.com/#/namespaces/tekton-pipelines/pipelineruns/homelab?pipelineTask=external&step=plan'
+        'url': 'https://tekton.loeber.live/#/namespaces/tekton-pipelines/pipelineruns/homelab?pipelineTask=external&step=plan'
     },
     {
         'name': 'matrix',
-        'url': 'https://chat.khuedoan.com/#/room/#random:matrix.khuedoan.com'
+        'url': 'https://chat.loeber.live/#/room/#random:matrix.loeber.live'
     },
     {
         'name': 'grafana',
-        'url': 'https://grafana.khuedoan.com/d/efa86fd1d0c121a26444b636a3f509a8/kubernetes-compute-resources-cluster'  # wtf is this ID
+        'url': 'https://grafana.loeber.live/d/efa86fd1d0c121a26444b636a3f509a8/kubernetes-compute-resources-cluster'  # wtf is this ID
     },
 ]
 
@@ -49,7 +49,7 @@ options.headless = True
 driver = webdriver.Firefox(
     options=options,
     firefox_profile=webdriver.FirefoxProfile(  # TODO deprecated
-        profile_directory="/home/khuedoan/.mozilla/firefox/h05irklw.default-release"  # TODO do not hard code
+        profile_directory="/home/zloeber/.mozilla/firefox/h05irklw.default-release"  # TODO do not hard code
     )
 )
 driver.set_window_size(1920, 1080)

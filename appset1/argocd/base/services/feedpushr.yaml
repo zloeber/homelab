@@ -8,7 +8,7 @@ spec:
   project: apps
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/services/rss/feedpushr
+    path: appset1/services/rss/feedpushr
     targetRevision: main
   destination:
     namespace: rss

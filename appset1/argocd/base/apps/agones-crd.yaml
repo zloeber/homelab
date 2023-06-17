@@ -8,7 +8,7 @@ spec:
   project: apps
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/services/agones
+    path: appset1/services/agones
     targetRevision: main
   destination:
     namespace: agones-system

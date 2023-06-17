@@ -6,7 +6,7 @@ spec:
   project: cluster
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/monitoring/crossplane
+    path: appset1/monitoring/crossplane
     targetRevision: main
   destination:
     namespace: infrastructure

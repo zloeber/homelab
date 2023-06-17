@@ -8,7 +8,7 @@ spec:
   project: monitoring
   source:
     repoURL: 'https://github.com/zloeber/homelab.git'
-    path: apps/monitoring/grafana
+    path: appset1/monitoring/grafana
     targetRevision: main
   destination:
     namespace: monitoring
