@@ -20,7 +20,7 @@ vars:
   ARGOCD_APPSET: appset1
   LOCAL_DOCKER_REGISTRY: registry.localhost:5001
 
-silent: true
+#silent: true
 
 tasks:
   secret:
