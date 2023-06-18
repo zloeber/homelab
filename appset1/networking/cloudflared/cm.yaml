@@ -8,7 +8,7 @@ data:
     credentials-file: /etc/cloudflared/creds/credentials.json
     no-autoupdate: true
     ingress:
-    - hostname: flame.gruber.dev.br
+    - hostname: flame.loeber.live
       service: http://flame-svc:5005
     - service: http_status:404
 ---

@@ -7,11 +7,11 @@ data:
     bridge:
       port: 6000
       bindAddress: 0.0.0.0
-      domain: matrix.gruber.dev.br
+      domain: matrix.loeber.live
       homeserverUrl: http://matrix-matrix-synapse.matrix.svc.cluster.local:8008
     provisioning:
       whitelist:
-        - "@*:matrix.gruber.dev.br"
+        - "@*:matrix.loeber.live"
       sharedSecret: ${SHARED_SECRET}
       apiPrefix: /_matrix/provision
     presence:

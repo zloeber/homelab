@@ -58,7 +58,6 @@ dotenv:
   # - '{{.CONFIG_PATH}}/environments/{{.TARGET}}.env'
   # - '{{.CONFIG_PATH}}/environments/{{.TARGET}}.override.env'
 
-
 includes:
   postgres: ./tasks/postgres.Taskfile.yaml
   tailscale: ./tasks/tailscale.Taskfile.yaml
@@ -316,7 +315,8 @@ tasks:
       - task: local
       - task: k3d:config:export
       - task: argocd:build:sidecar
-      - task: argocd:push:sidecar
+      #- task: argocd:push:sidecar:remote
+      - task: argocd:push:sidecar:local
       # - task: argocd:repo
       # - task: argocd:secret
       # - task: argocd:build

@@ -5,7 +5,7 @@ metadata:
   labels:
     app: librex
   annotations:
-    link.argocd.argoproj.io/external-link: http://g.gruber.dev.br
+    link.argocd.argoproj.io/external-link: http://g.loeber.live
 spec:
   replicas: 1
   strategy:

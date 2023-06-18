@@ -12,27 +12,27 @@ spec:
     solvers:
     - selector:
         dnsNames:
-        - '*.gruber.dev.br'
-        - gruber.dev.br
-        - onchange.gruber.dev.br
-        - ai.gruber.dev.br
-        - home.gruber.dev.br
-        - monitoring.gruber.dev.br
-        - grafana.gruber.dev.br
-        - jupyter.gruber.dev.br
-        - ha.gruber.dev.br
-        - argo.gruber.dev.br
-        - chat.gruber.dev.br
-        - status.gruber.dev.br
-        - kuma.gruber.dev.br
-        - manga.gruber.dev.br
-        - books.gruber.dev.br
-        - finance.gruber.dev.br
-        - budget.gruber.dev.br
-        - n8n.gruber.dev.br
-        - unifi.gruber.dev.br
-        - lab.gruber.dev.br
-        - g.gruber.dev.br
+        - '*.loeber.live'
+        - loeber.live
+        - onchange.loeber.live
+        - ai.loeber.live
+        - home.loeber.live
+        - monitoring.loeber.live
+        - grafana.loeber.live
+        - jupyter.loeber.live
+        - ha.loeber.live
+        - argo.loeber.live
+        - chat.loeber.live
+        - status.loeber.live
+        - kuma.loeber.live
+        - manga.loeber.live
+        - books.loeber.live
+        - finance.loeber.live
+        - budget.loeber.live
+        - n8n.loeber.live
+        - unifi.loeber.live
+        - lab.loeber.live
+        - g.loeber.live
       dns01:
         cloudflare:
           email: rpg.gruber@gmail.com

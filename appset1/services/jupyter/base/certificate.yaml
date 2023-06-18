@@ -7,6 +7,6 @@ spec:
   issuerRef:
     name: letsencrypt-production
     kind: ClusterIssuer
-  commonName: lab.gruber.dev.br
+  commonName: lab.loeber.live
   dnsNames:
-  - lab.gruber.dev.br
+  - lab.loeber.live

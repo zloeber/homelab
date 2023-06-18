@@ -17,15 +17,15 @@ spec:
           repository: matrixdotorg/synapse
           # tag: ''
           pullPolicy: IfNotPresent
-        serverName: 'matrix.gruber.dev.br'
-        publicServerName: 'matrix.gruber.dev.br'
+        serverName: 'matrix.loeber.live'
+        publicServerName: 'matrix.loeber.live'
         signingkey:
           job:
             enabled: false
             existingSecret: matrix-sign
             existingSecretKey: signature
         config:
-          publicBaseurl: 'https://matrix.gruber.dev.br'
+          publicBaseurl: 'https://matrix.loeber.live'
           reportStats: false
           enableRegistration: false
           registrationSharedSecret: <path:kv/data/synapse#registrationSharedSecret>

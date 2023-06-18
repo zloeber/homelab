@@ -3,14 +3,14 @@ kind: Ingress
 metadata:
   name: unifi-internal
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: unifi.gruber.dev.br
+    external-dns.alpha.kubernetes.io/hostname: unifi.loeber.live
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
     external-dns.alpha.kubernetes.io/ttl: "120"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
   rules:
-  - host: unifi.gruber.dev.br
+  - host: unifi.loeber.live
     http:
       paths:
       - path: /
@@ -22,5 +22,5 @@ spec:
               name: devices
   tls:
   - hosts:
-    - unifi.gruber.dev.br
+    - unifi.loeber.live
     secretName: unifi-tls

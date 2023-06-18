@@ -5,14 +5,14 @@ metadata:
   labels:
     app: librex
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: g.gruber.dev.br
+    external-dns.alpha.kubernetes.io/hostname: g.loeber.live
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
     external-dns.alpha.kubernetes.io/ttl: "120"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
   rules:
-  - host: g.gruber.dev.br
+  - host: g.loeber.live
     http:
       paths:
       - path: /
@@ -24,5 +24,5 @@ spec:
               name: web
   tls:
   - hosts:
-    - g.gruber.dev.br
+    - g.loeber.live
     secretName: librex-tls

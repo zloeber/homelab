@@ -5,7 +5,7 @@ metadata:
   labels:
     app: wallabag
   annotations:
-    link.argocd.argoproj.io/external-link: http://wallabag.gruber.dev.br
+    link.argocd.argoproj.io/external-link: http://wallabag.loeber.live
 spec:
   replicas: 1
   strategy:

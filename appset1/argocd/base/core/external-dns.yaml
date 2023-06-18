@@ -19,7 +19,7 @@ spec:
           region: us-east-1
           zonesCacheDuration: 0
         domainFilters:
-          - gruber.dev.br
+          - loeber.live
         azure:
           useManagedIdentityExtension: false
         cloudflare:

@@ -3,14 +3,14 @@ kind: Ingress
 metadata:
   name: n8n
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: n8n.gruber.dev.br
+    external-dns.alpha.kubernetes.io/hostname: n8n.loeber.live
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
     external-dns.alpha.kubernetes.io/ttl: "120"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
   rules:
-  - host: n8n.gruber.dev.br
+  - host: n8n.loeber.live
     http:
       paths:
       - path: /
@@ -22,5 +22,5 @@ spec:
               name: web
   tls:
   - hosts:
-    - n8n.gruber.dev.br
+    - n8n.loeber.live
     secretName: n8n-tls

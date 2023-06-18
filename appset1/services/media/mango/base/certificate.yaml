@@ -7,6 +7,6 @@ spec:
   issuerRef:
     name: letsencrypt-production
     kind: ClusterIssuer
-  commonName: manga.gruber.dev.br
+  commonName: manga.loeber.live
   dnsNames:
-  - manga.gruber.dev.br
+  - manga.loeber.live

@@ -5,7 +5,7 @@ metadata:
   labels:
     app: tanoshi
   annotations:
-    link.argocd.argoproj.io/external-link: https://read.gruber.dev.br
+    link.argocd.argoproj.io/external-link: https://read.loeber.live
 spec:
   replicas: 1
   strategy:

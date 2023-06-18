@@ -5,7 +5,7 @@ metadata:
   labels:
     app: element
   annotations:
-    link.argocd.argoproj.io/external-link: https://chat.gruber.dev.br
+    link.argocd.argoproj.io/external-link: https://chat.loeber.live
 spec:
   replicas: 1
   strategy:

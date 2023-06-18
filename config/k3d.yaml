@@ -1,17 +1,45 @@
-apiVersion: k3d.io/v1alpha4
+apiVersion: k3d.io/v1alpha5
 kind: Simple
 metadata:
-  name: homelab-dev
+  name: homelab
 image: docker.io/rancher/k3s:v1.27.1-k3s1
 servers: 1
 agents: 0
+# kubeAPI: # same as `--api-port myhost.my.domain:6445` (where the name would resolve to 127.0.0.1)
+#   host: "localhost" # important for the `server` setting in the kubeconfig
+#   hostIP: "0.0.0.0" # where the Kubernetes API will be listening on
+#   hostPort: "6443" # where the Kubernetes API listening port will be mapped to on your host system
+# hostAliases: # /etc/hosts style entries to be injected into /etc/hosts in the node containers and in the NodeHosts section in CoreDNS
+#   - ip: 1.2.3.4
+#     hostnames: 
+#       - my.host.local
+#       - that.other.local
+#   - ip: 1.1.1.1
+#     hostnames:
+#       - cloud.flare.dns
+
 options:
+  kubeconfig:
+    updateDefaultKubeconfig: true # add new cluster to your default Kubeconfig; same as `--kubeconfig-update-default` (default: true)
+    switchCurrentContext: true # also set current-context to the new cluster's context; same as `--kubeconfig-switch-context` (default: true)
+  k3d: # k3d runtime settings
+    wait: true # wait for cluster to be usable before returning; same as `--wait` (default: true)
+    timeout: "60s" # wait timeout before aborting; same as `--timeout 60s`
+    disableLoadbalancer: false # same as `--no-lb`
+    disableImageVolume: false # same as `--no-image-volume`
+    disableRollback: false # same as `--no-Rollback`
+    loadbalancer:
+      configOverrides:
+        - settings.workerConnections=2048
   k3s:
     extraArgs:
       - arg: --disable=traefik
         nodeFilters:
           - server:*
       - arg: --disable-cloud-controller
+        nodeFilters:
+          - server:*
+      - arg: --tls-san=homelab.loeber.live,linbox4.bighouse.local,linbox4,homelab
         nodeFilters:
           - server:*
 ports:
@@ -21,3 +49,9 @@ ports:
   - port: 443:443
     nodeFilters:
       - loadbalancer
+
+registries: # define how registries should be created or used
+  create: # creates a default registry to be used with the cluster; same as `--registry-create registry.localhost`
+    name: registry.localhost
+    host: "0.0.0.0"
+    hostPort: "5001"

@@ -58,7 +58,7 @@ tasks:
       - sh: "which k3d"
         msg: "k3d {{.PATH_ERROR}}"
     cmds:
-      - mkdir -p ~/.k3d/kubeconfig
+      - mkdir -p ~/.k3d
       - echo $(k3d kubeconfig get homelab-dev > ~/.k3d/kubeconfig
       - k3d kubeconfig get homelab-dev
 

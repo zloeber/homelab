@@ -3,14 +3,14 @@ kind: Ingress
 metadata:
   name: wandb
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: ai.gruber.dev.br
+    external-dns.alpha.kubernetes.io/hostname: ai.loeber.live
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
     external-dns.alpha.kubernetes.io/ttl: "120"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
   rules:
-  - host: ai.gruber.dev.br
+  - host: ai.loeber.live
     http:
       paths:
       - path: /
@@ -22,5 +22,5 @@ spec:
               name: http
   tls:
   - hosts:
-    - ai.gruber.dev.br
+    - ai.loeber.live
     secretName: wandb-tls
