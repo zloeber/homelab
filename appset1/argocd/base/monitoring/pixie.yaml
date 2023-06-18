@@ -36,7 +36,7 @@ spec:
               cpu: 200m
               memory: 512Mi
           nodeSelector:
-            kubernetes.io/hostname: node-one
+            kubernetes.io/hostname: k3d-homelab-server-0
         patches: {}
   destination:
     namespace: monitoring

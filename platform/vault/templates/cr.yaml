@@ -40,8 +40,8 @@ spec:
 
   # Support for pod nodeSelector rules to control which nodes can be chosen to run
   # the given pods
-  # nodeSelector:
-  #   "node-role.kubernetes.io/your_role": "true"
+  nodeSelector:
+    "node-role.kubernetes.io/your_role": "true"
 
   # Support for node tolerations that work together with node taints to control
   # the pods that can like on a node

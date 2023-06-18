@@ -13,7 +13,7 @@ spec:
       releaseName: redis-operator
       values: |
           nodeSelector:
-            kubernetes.io/hostname: node-one
+            kubernetes.io/hostname: k3d-homelab-server-0
           redisOperator:
             imageName: quay.io/opstree/redis-operator
             imagePullPolicy: Always

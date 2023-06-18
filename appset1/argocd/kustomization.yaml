@@ -16,7 +16,7 @@ resources:
 - base/core/redis.yaml
 - base/core/redis-crd.yaml
 - base/core/storage.yaml
-- base/core/tailscale-operator.yaml
+#- base/core/tailscale-operator.yaml
 - base/core/external-dns.yaml
 - base/core/nginx-ingress.yaml
 - base/core/certmanager.yaml
@@ -116,8 +116,8 @@ resources:
 - base/repo-rb.yaml
 
 # ArgoCD Remote Resources
-- https://github.com/zloeber/homelab/appset1/networking/tailscale
-- https://github.com/zloeber/homelab/appset1/networking/cloudflared
+# - https://github.com/zloeber/homelab/appset1/networking/tailscale
+# - https://github.com/zloeber/homelab/appset1/networking/cloudflared
 
 - https://raw.githubusercontent.com/argoproj/argo-cd/v2.7.2/manifests/install.yaml
 
@@ -132,9 +132,9 @@ patchesStrategicMerge:
 - overlay/argocd-svc.yaml
 - overlay/argocd-deployment.yaml
 - overlay/argocd-cm.yaml
-- overlay/cloudflared-cm.yaml
+#- overlay/cloudflared-cm.yaml
 - overlay/argocd-rbac.yaml
-- overlay/tailscale-rb.yaml
+#- overlay/tailscale-rb.yaml
 
 namespace: argocd
 images:
@@ -157,7 +157,7 @@ patches:
     - op: add
       path: "/spec/template/spec/nodeSelector"
       value:
-        kubernetes.io/hostname: node-one
+        kubernetes.io/hostname: k3d-homelab-server-0
         kubernetes.io/arch: amd64
   target:
     kind: Deployment
@@ -165,7 +165,7 @@ patches:
     - op: add
       path: "/spec/template/spec/nodeSelector"
       value:
-        kubernetes.io/hostname: node-one
+        kubernetes.io/hostname: k3d-homelab-server-0
         kubernetes.io/arch: amd64
   target:
     kind: StatefulSet

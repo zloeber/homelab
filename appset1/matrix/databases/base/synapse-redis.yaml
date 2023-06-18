@@ -36,4 +36,4 @@ spec:
     serviceType: ClusterIP
     port: 6379
   nodeSelector:
-    kubernetes.io/hostname: node-one
+    kubernetes.io/hostname: k3d-homelab-server-0

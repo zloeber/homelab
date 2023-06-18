@@ -11,7 +11,7 @@ vars:
   RESET: tput sgr0
   CLEAR: tput reset
   PATH_ERROR: is not installed or correctly configured in PATH.
-
+  K3D_CLUSTER: homelab
 tasks:
   start:
     desc: Starts your local k3d cluster.
@@ -59,6 +59,6 @@ tasks:
         msg: "k3d {{.PATH_ERROR}}"
     cmds:
       - mkdir -p ~/.k3d
-      - echo $(k3d kubeconfig get homelab-dev > ~/.k3d/kubeconfig
-      - k3d kubeconfig get homelab-dev
+      - echo $(k3d kubeconfig get {{.K3D_CLUSTER}}) > ~/.k3d/kubeconfig
+      - k3d kubeconfig get {{.K3D_CLUSTER}}
 

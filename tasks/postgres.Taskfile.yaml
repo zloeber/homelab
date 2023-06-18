@@ -36,7 +36,7 @@ tasks:
 
   label:
     cmds:
-      - kubectl label node node-one postgres-operator=enabled
+      - kubectl label node k3d-homelab-server-0 postgres-operator=enabled
 
   decrypt:
     cmds:

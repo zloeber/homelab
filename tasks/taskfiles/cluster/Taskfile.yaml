@@ -311,7 +311,7 @@ tasks:
       - rm {{.K3S_CONFIG}}
       - |
         cat << EOF > {{.K3S_CONFIG}}
-        node-name: "node-one"
+        node-name: "k3d-homelab-server-0"
         node-ip: "${NODE_ONE_IP},{{.IPV6_NETWORK}}"
         cluster-init: true
         tls-san:
@@ -411,7 +411,7 @@ tasks:
     cmds:
       - |
         cat << EOF > example.yaml
-        node-name: "node-one"
+        node-name: "k3d-homelab-server-0"
         node-ip: "${NODE_ONE_IP},{{.IPV6_NETWORK}}"
         cluster-init: true
         tls-san:

@@ -83,7 +83,7 @@ spec:
           tolerations: []
           nodeSelector:
             kubernetes.io/arch: amd64
-            kubernetes.io/hostname: node-one
+            kubernetes.io/hostname: k3d-homelab-server-0
           priorityClassName: ""
           annotations:
             reloader.stakater.com/auto: "true"
@@ -208,7 +208,7 @@ spec:
           tolerations: []
           nodeSelector:
             kubernetes.io/arch: amd64
-            kubernetes.io/hostname: node-one
+            kubernetes.io/hostname: k3d-homelab-server-0
           networkPolicy:
             enabled: false
             egress: []

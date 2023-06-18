@@ -65,13 +65,13 @@ tasks:
 
   label:nodes:
     cmds:
-      - kubectl label node node-one node.longhorn.io/create-default-disk='config'
+      - kubectl label node k3d-homelab-server-0 node.longhorn.io/create-default-disk='config'
       - kubectl label node node-two node.longhorn.io/create-default-disk='config'
 
   annotate:nodes:
     cmds:
       - |
-        kubectl annotate node node-one \
+        kubectl annotate node k3d-homelab-server-0 \
         node.longhorn.io/default-disks-config='[{"path":"/mnt/storage","allowScheduling":true}]'
       - |
         kubectl annotate node node-two \

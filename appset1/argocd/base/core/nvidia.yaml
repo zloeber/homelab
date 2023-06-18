@@ -61,7 +61,7 @@ spec:
             cpu: 100m
             memory: 256Mi
         nodeSelector:
-          kubernetes.io/hostname: node-one
+          kubernetes.io/hostname: k3d-homelab-server-0
         affinity: {}
         tolerations:
           - key: CriticalAddonsOnly
