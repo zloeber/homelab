@@ -31,3 +31,4 @@ book/
 *kubeconfig.yaml
 Chart.lock
 .SECRET
+./.secret/

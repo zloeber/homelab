@@ -126,10 +126,10 @@ tasks:
                    -t {{.DOCKER_REGISTRY}}/zloeber/argocd-sidecar:v{{.ARGOCD_VERSION}} \
                    -t {{.DOCKER_REGISTRY}}/zloeber/argocd:v{{.ARGOCD_VERSION}} \
                    -t {{.DOCKER_REGISTRY}}/zloeber/argocd:latest \
-                   -t {{.LOCAL_DOCKER_REGISTRY}}/zloeber/argocd-sidecar:latest \
-                   -t {{.LOCAL_DOCKER_REGISTRY}}/zloeber/argocd-sidecar:v{{.ARGOCD_VERSION}} \
-                   -t {{.LOCAL_DOCKER_REGISTRY}}/zloeber/argocd:v{{.ARGOCD_VERSION}} \
-                   -t {{.LOCAL_DOCKER_REGISTRY}}/zloeber/argocd:latest .
+                   -t {{.LOCAL_DOCKER_REGISTRY}}/argocd-sidecar:latest \
+                   -t {{.LOCAL_DOCKER_REGISTRY}}/argocd-sidecar:v{{.ARGOCD_VERSION}} \
+                   -t {{.LOCAL_DOCKER_REGISTRY}}/argocd:v{{.ARGOCD_VERSION}} \
+                   -t {{.LOCAL_DOCKER_REGISTRY}}/argocd:latest .
     ignore_error: true
 
   push:sidecar:
@@ -142,6 +142,10 @@ tasks:
     - docker push {{.DOCKER_REGISTRY}}/zloeber/argocd-sidecar:v{{.ARGOCD_VERSION}}
     - docker push {{.DOCKER_REGISTRY}}/zloeber/argocd:latest
     - docker push {{.DOCKER_REGISTRY}}/zloeber/argocd:v{{.ARGOCD_VERSION}}
+    - docker push {{.LOCAL_DOCKER_REGISTRY}}/argocd-sidecar:latest
+    - docker push {{.LOCAL_DOCKER_REGISTRY}}/argocd-sidecar:v{{.ARGOCD_VERSION}}
+    - docker push {{.LOCAL_DOCKER_REGISTRY}}/argocd:latest
+    - docker push {{.LOCAL_DOCKER_REGISTRY}}/argocd:v{{.ARGOCD_VERSION}}
     ignore_error: true
 
   push:sidecar:remote:
@@ -162,10 +166,10 @@ tasks:
     - sh: 'which docker'
       msg: 'docker {{.PATH_ERROR}}'
     cmds:
-    - docker push {{.LOCAL_DOCKER_REGISTRY}}/zloeber/argocd-sidecar:latest 
-    - docker push {{.LOCAL_DOCKER_REGISTRY}}/zloeber/argocd-sidecar:v{{.ARGOCD_VERSION}}
-    - docker push {{.LOCAL_DOCKER_REGISTRY}}/zloeber/argocd:latest
-    - docker push {{.LOCAL_DOCKER_REGISTRY}}/zloeber/argocd:v{{.ARGOCD_VERSION}}
+    - docker push {{.LOCAL_DOCKER_REGISTRY}}/argocd-sidecar:latest 
+    - docker push {{.LOCAL_DOCKER_REGISTRY}}/argocd-sidecar:v{{.ARGOCD_VERSION}}
+    - docker push {{.LOCAL_DOCKER_REGISTRY}}/argocd:latest
+    - docker push {{.LOCAL_DOCKER_REGISTRY}}/argocd:v{{.ARGOCD_VERSION}}
     ignore_error: true
   rm:
     dir: "{{.ARGOCD_APPSET}}/argocd"

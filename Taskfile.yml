@@ -11,6 +11,7 @@ vars:
   RESET: tput sgr0
   CLEAR: tput reset
   PATH_ERROR: is not installed or correctly configured in PATH.
+
   K8S_VERSION: 1.26.1
   ROOT_PATH:
     sh: 'echo "$(cd "$( dirname -- "$0" )" && pwd)"'
@@ -44,19 +45,16 @@ vars:
   SSH_HOST_KEY:
     sh: echo "~/.ssh/${HOST}-id_rsa.pub"
   WORKSPACE: "default"
-  WORKSPACE_PATH: "{{.ROOT_PATH}}/workspaces/{{.WORKSPACE}}"
+  WORKSPACE_PATH: "{{.ROOT_PATH}}/.metagit/workspaces/{{.WORKSPACE}}"
   WORKSPACE_CONFIG: "{{.CONFIG_PATH}}/workspace.vendir.{{.WORKSPACE}}.yml"
   LC_ALL: "C.UTF-8"
-# env:
-#   AUTHOR_NAME: '{{default "{{.AUTHOR_NAME}}" "git" }}'
-#   AUTHOR_EMAIL: '{{default "{{.AUTHOR_EMAIL}}" "git@nowhere" }}'
-
+  GITHUB_USER: '{{default "{{.GITHUB_USER}}" "zloeber" }}'
+  GH_USER: '{{default "{{.GITHUB_USER}}" "zloeber" }}'
+  AUTHOR_NAME: '{{default "{{.AUTHOR_NAME}}" "Zachary Loeber" }}'
+  AUTHOR_EMAIL: '{{default "{{.AUTHOR_EMAIL}}" "zloeber@gmail.com" }}'
 
 dotenv:
   - '.SECRET'
-  # - '{{.CONFIG_PATH}}/profiles/{{.PROFILE}}.env'
-  # - '{{.CONFIG_PATH}}/environments/{{.TARGET}}.env'
-  # - '{{.CONFIG_PATH}}/environments/{{.TARGET}}.override.env'
 
 includes:
   postgres: ./tasks/postgres.Taskfile.yaml
@@ -80,16 +78,16 @@ includes:
   kind: ./tasks/taskfiles/kind
   k3d: ./tasks/taskfiles/k3d
 
+silent: true
+
 tasks:
   default:
-    silent: true
     cmds:
     - |
       {{.task_binary}} -l
 
   show:
     desc: Show task variables
-    silent: true
     cmds:
     - |
       echo "ROOT_PATH: {{.ROOT_PATH}}"
@@ -108,13 +106,12 @@ tasks:
       echo "BUILD_DATE: {{.BUILD_DATE}}"
       echo "GIT_LATEST_TAG: {{.GIT_LATEST_TAG}}"
       echo "task_binary: {{.task_binary}}"
+      echo "GITHUB_USER {{.GITHUB_USER}}"
       echo "AUTHOR_NAME {{.AUTHOR_NAME}}"
       echo "AUTHOR_EMAIL {{.AUTHOR_EMAIL}}"
-      printenv | grep "AWS_"
 
   show:all:
     desc: Show all output for subtasks groups as well
-    silent: true
     cmds:
     - |
       echo "## Show ##";
@@ -131,11 +128,12 @@ tasks:
     silent: true
     cmds:
       - |
-        echo "GH_USER=zloeber" > .SECRET
+        echo "GH_USER=${GH_USER}" > .SECRET
         echo "GH_PASS=${GH_PASS}" >> .SECRET
         echo "GH_TOKEN=${GH_TOKEN}" >> .SECRET
         echo "GH_OWNER=zloeber" >> .SECRET
         echo "GIT_TOKEN=${GIT_TOKEN}" >> .SECRET
+        echo "GITHUB_USER=${GITHUB_USER}" >> .SECRET
     status:
       - test .SECRET
 
@@ -193,13 +191,13 @@ tasks:
     cmds:
       - terraform-docs markdown -c .terraform-docs.yaml . --output-file README.md
 
-  local:
-    desc: local-path storage
-    preconditions:
-      - sh: "which kustomize"
-        msg: "kustomize {{.PATH_ERROR}}"
-    cmds:
-      - kustomize build "github.com/rancher/local-path-provisioner/deploy?ref=v0.0.22" | kubectl apply -f -
+  # local:
+  #   desc: local-path storage
+  #   preconditions:
+  #     - sh: "which kustomize"
+  #       msg: "kustomize {{.PATH_ERROR}}"
+  #   cmds:
+  #     - kustomize build "github.com/rancher/local-path-provisioner/deploy?ref=v0.0.22" | kubectl apply -f -
 
   validate:
     preconditions:
@@ -281,26 +279,26 @@ tasks:
       - helm repo update
     ignore_error: true
 
-  dns:
-    desc: Creates the DNS entry required for the local domain to work.
-    preconditions:
-      - sh: "which hostctl"
-        msg: "hostctl {{.PATH_ERROR}}"
-    summary: |
-      Configuring Local DNS configuration through hostctl
-      This command uses hostctl to manage entries on /etc/hosts on a
-      a cross operational system compatible way. This command should work
-      on all MacOS, Windows and Linux. It adds all the '*.k8s.localhost'
-      domains to your local DNS hosts file. It also makes it easy for the
-      user to reverse those changes, avoiding pollution on your hosts
-      (or equivalent) file.
-    cmds:
-      - task: clear
-      - sleep 0.01 && {{if eq OS "windows"}}hostctl add k8s -q < config/.etchosts{{else}}sudo hostctl add k8s -q < config/.etchosts{{end}}
-      - task: highlight_normal
-      - echo -e "Added 'k8s.localhost' and related domains to your hosts file!"
-      - task: reset
-    ignore_error: true
+  # dns:
+  #   desc: Creates the DNS entry required for the local domain to work.
+  #   preconditions:
+  #     - sh: "which hostctl"
+  #       msg: "hostctl {{.PATH_ERROR}}"
+  #   summary: |
+  #     Configuring Local DNS configuration through hostctl
+  #     This command uses hostctl to manage entries on /etc/hosts on a
+  #     a cross operational system compatible way. This command should work
+  #     on all MacOS, Windows and Linux. It adds all the '*.k8s.localhost'
+  #     domains to your local DNS hosts file. It also makes it easy for the
+  #     user to reverse those changes, avoiding pollution on your hosts
+  #     (or equivalent) file.
+  #   cmds:
+  #     - task: clear
+  #     - sleep 0.01 && {{if eq OS "windows"}}hostctl add k8s -q < config/.etchosts{{else}}sudo hostctl add k8s -q < config/.etchosts{{end}}
+  #     - task: highlight_normal
+  #     - echo -e "Added 'k8s.localhost' and related domains to your hosts file!"
+  #     - task: reset
+  #   ignore_error: true
   
   login:
     desc: Login to various services (run once)
@@ -312,7 +310,8 @@ tasks:
     cmds:
       - task: k3d:delete
       - task: k3d:start
-      - task: local
+      #- task: local
+      - task: repos
       - task: k3d:config:export
       - task: argocd:build:sidecar
       - task: argocd:push:sidecar
@@ -320,12 +319,12 @@ tasks:
       - task: argocd:deploy
       - task: argocd:repo
 
-  start:
-    desc: start local cluster via k3d
-    cmds:
-      - |
-        make -C metal cluster env=dev
-        make -C bootstrap
+  # start:
+  #   desc: start local cluster via k3d
+  #   cmds:
+  #     - |
+  #       make -C metal cluster env=dev
+  #       make -C bootstrap
 
   stop:
     desc: stop local cluster
