@@ -1,6 +1,6 @@
 version: "3"
 vars:
-  CYAN: tput setaf 6
+  CYAN: "tput setaf 6"
   RED: tput setaf 1
   YELLOW: tput setaf 3
   GREEN: tput setaf 2

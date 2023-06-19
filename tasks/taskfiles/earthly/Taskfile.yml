@@ -1,4 +1,3 @@
-desc: earthly tasks
 version: "3"
 env:
   earthly: "{{.LOCAL_BIN_PATH}}/earthly"

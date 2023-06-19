@@ -1,14 +1,22 @@
 #!/bin/sh
 
-make .dep/taskfile
-
 here=$(pwd)
 
-export PATH="${here}/venv/bin:${HOME}/venv/bin:${here}/.local/bin:${HOME}/.local/share/aquaproj-aqua/bin:${PATH}"
+first_run=${FORCE:-false}
+if [ ! -f ./venv/bin/task ] || [ "$first_run" = "true" ]; then
+    mkdir -p ./venv/bin
+    sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ./venv/bin
+fi
 
-task workstation:install:base
+export PATH="${here}/venv/bin:${HOME}/.local/share/aquaproj-aqua/bin:${PATH}"
+
+if [ "$first_run" = "true" ]; then
+    task workstation:install:base
+fi
+
+task python:venv --force
+task teller:install --force
 task asdf:bootstrap
-task aqua:sync
-
+#task aqua:sync
 
 #task install:chezmoi

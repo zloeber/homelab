@@ -1,0 +1,36 @@
+version: "3"
+vars:
+  teller: "{{.LOCAL_BIN_PATH}}/teller"
+  teller_version: "1.5.6"
+
+tasks:
+  show:
+    desc: Show task variables
+    silent: true
+    cmds:
+      - |
+        echo "LOCAL_BIN_PATH: {{.LOCAL_BIN_PATH}}"
+        echo "teller: {{.teller}}"
+        echo "teller_version: {{.teller_version}}"
+
+  install:
+    desc: Install teller
+    silent: true
+    cmds:
+      - |
+        mkdir -p {{.LOCAL_BIN_PATH}}
+        wget https://github.com/tellerops/teller/releases/download/v{{.teller_version}}/teller_{{.teller_version}}_Linux_x86_64.tar.gz  -O /tmp/teller.tar.gz
+        pushd /tmp
+        tar xzvf ./teller.tar.gz
+        mv ./teller {{.teller}}
+        popd
+        chmod +x {{.teller}}
+    status:
+      - test -f {{.teller}}
+
+  init:
+    desc: Initialize teller config
+    silent: true
+    cmds:
+      - source {{.PYTHON_VENV_PATH}}/bin/activate
+      - teller init

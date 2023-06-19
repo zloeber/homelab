@@ -64,7 +64,7 @@
 
 variable "vault_username" {
   type        = string
-  default     = "gruber"
+  default     = "zloeber"
   description = "<sub>Vault plaintext username to login.</sub>"
   validation {
     condition     = can(regex("^[a-z0-9][-a-z0-9]*[a-z0-9]$", var.vault_username))

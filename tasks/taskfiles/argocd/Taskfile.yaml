@@ -60,7 +60,7 @@ tasks:
       GIT_URI:
         sh: git config --get remote.origin.url | sed -e 's/:/\//g'| sed -e 's/ssh\/\/\///g'| sed -e 's/git@/https:\/\//g' | sed 's/.git$//'
     cmds:
-    - rm config/repo.yaml
+    #- rm config/repo.yaml
     - |
       kubectl apply -f - << EOF
       apiVersion: v1

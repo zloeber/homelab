@@ -77,6 +77,7 @@ includes:
   workstation: ./tasks/taskfiles/workstation
   kind: ./tasks/taskfiles/kind
   k3d: ./tasks/taskfiles/k3d
+  teller: ./tasks/taskfiles/teller
 
 silent: true
 
@@ -232,13 +233,13 @@ tasks:
       - find . -maxdepth 20 -name rb.yaml -exec kubeconform -summary -exit-on-error -ignore-missing-schemas -kubernetes-version "{{.K8S_VERSION}}" -schema-location default {} \;
     silent: true
 
-  calc:
-    preconditions:
-      - sh: "which kuota-calc"
-        msg: "kuota-calc {{.PATH_ERROR}}"
-    cmds:
-      - find . -maxdepth 20 -name deployment.yaml -exec cat {} \; | kuota-calc --detailed
-      - find . -maxdepth 20 -name statefulset.yaml -exec cat {} \; | kuota-calc --detailed
+  # calc:
+  #   preconditions:
+  #     - sh: "which kuota-calc"
+  #       msg: "kuota-calc {{.PATH_ERROR}}"
+  #   cmds:
+  #     - find . -maxdepth 20 -name deployment.yaml -exec cat {} \; | kuota-calc --detailed
+  #     - find . -maxdepth 20 -name statefulset.yaml -exec cat {} \; | kuota-calc --detailed
 
 
   repos:
@@ -310,7 +311,6 @@ tasks:
     cmds:
       - task: k3d:delete
       - task: k3d:start
-      #- task: local
       - task: repos
       - task: k3d:config:export
       - task: argocd:build:sidecar
@@ -327,14 +327,13 @@ tasks:
   #       make -C bootstrap
 
   stop:
-    desc: stop local cluster
+    desc: Stop local k3d cluster
     cmds:
-      - |
-        make clean
+      - task: k3d:delete
 
-  config:
-    desc: Update the configuration
-    cmds:
-      - |
-        source {{.PYTHON_VENV_PATH}}/bin/activate
-        python ./scripts/configure
+  # config:
+  #   desc: Update the configuration
+  #   cmds:
+  #     - |
+  #       source {{.PYTHON_VENV_PATH}}/bin/activate
+  #       python ./scripts/configure

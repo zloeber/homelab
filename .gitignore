@@ -20,7 +20,7 @@
 workspaces/default/*/
 venv
 venv/
-.metagit
+.metagit/
 .venv/
 book/
 
@@ -29,6 +29,7 @@ book/
 *.png
 *.tgz
 *kubeconfig.yaml
+kubeconfig
 Chart.lock
 .SECRET
 ./.secret/
