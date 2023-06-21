@@ -19,7 +19,8 @@ tasks:
     cmds:
       - |
         mkdir -p {{.LOCAL_BIN_PATH}}
-        wget https://github.com/tellerops/teller/releases/download/v{{.teller_version}}/teller_{{.teller_version}}_Linux_x86_64.tar.gz  -O /tmp/teller.tar.gz
+        os=${OS:-"Linux"}
+        wget https://github.com/tellerops/teller/releases/download/v{{.teller_version}}/teller_{{.teller_version}}_${os}_x86_64.tar.gz  -O /tmp/teller.tar.gz
         pushd /tmp
         tar xzvf ./teller.tar.gz
         mv ./teller {{.teller}}

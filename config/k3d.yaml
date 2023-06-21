@@ -53,5 +53,5 @@ ports:
 registries: # define how registries should be created or used
   create: # creates a default registry to be used with the cluster; same as `--registry-create registry.localhost`
     name: registry.localhost
-    host: "0.0.0.0"
-    hostPort: "5001"
+    # host: "0.0.0.0"
+    # hostPort: ":5000"

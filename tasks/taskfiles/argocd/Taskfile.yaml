@@ -18,7 +18,7 @@ vars:
   GH_PRIVATE_DEPLOY_REPO: homelab-private
   DOCKER_REGISTRY: cloud.canister.io:5000
   ARGOCD_APPSET: appset1
-  LOCAL_DOCKER_REGISTRY: registry.localhost:5001
+  LOCAL_DOCKER_REGISTRY: registry.localhost:5000
 
 #silent: true
 
