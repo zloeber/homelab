@@ -337,3 +337,11 @@ tasks:
   #     - |
   #       source {{.PYTHON_VENV_PATH}}/bin/activate
   #       python ./scripts/configure
+
+  show:vars:
+    desc: show all variables in Taskfile
+    cmds:
+      - |
+        echo -e \
+        "\n{{range $key, $value := .}} {{$key }}:  \e[92m{{$value}}\e[0m\n {{end}}\n"
+    silent: true

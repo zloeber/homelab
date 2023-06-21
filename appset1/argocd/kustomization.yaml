@@ -17,7 +17,7 @@ resources:
 - base/core/redis-crd.yaml
 - base/core/storage.yaml
 #- base/core/tailscale-operator.yaml
-- base/core/external-dns.yaml
+#- base/core/external-dns.yaml
 - base/core/nginx-ingress.yaml
 - base/core/certmanager.yaml
 - base/core/issuer.yaml
@@ -46,11 +46,11 @@ resources:
 - base/apps/ha.yaml
 #- base/apps/wyze.yaml
 #- base/apps/unifi.yaml
-- base/apps/agones.yaml
-- base/apps/agones-crd.yaml
-- base/apps/milvus.yaml
+# - base/apps/agones.yaml
+# - base/apps/agones-crd.yaml
+#- base/apps/milvus.yaml
 - base/apps/mongodb.yaml
-- base/apps/wandb.yaml
+#- base/apps/wandb.yaml
 - base/apps/mongodb-crds.yaml
 # - base/apps/adguard.yaml
 
@@ -66,11 +66,11 @@ resources:
 # - base/monitoring/pixie.yaml
 
 # Applications/Services
-- base/services/n8n.yaml
-- base/services/onchange.yaml
-- base/services/actual.yaml
+#- base/services/n8n.yaml
+#- base/services/onchange.yaml
+#- base/services/actual.yaml
 #- base/services/jupyterlab.yaml
-- base/services/taskwarrior.yaml
+#- base/services/taskwarrior.yaml
 # - base/services/librex.yaml
 - base/services/gitea.yaml
 # - base/services/rss-hub.yaml
@@ -119,7 +119,7 @@ resources:
 # - https://github.com/zloeber/homelab/appset1/networking/tailscale
 # - https://github.com/zloeber/homelab/appset1/networking/cloudflared
 
-- https://raw.githubusercontent.com/argoproj/argo-cd/v2.7.2/manifests/install.yaml
+- https://raw.githubusercontent.com/argoproj/argo-cd/v2.7.3/manifests/install.yaml
 
 # Image Updater
 - https://github.com/argoproj-labs/argocd-image-updater/manifests/base
