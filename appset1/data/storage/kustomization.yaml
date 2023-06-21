@@ -7,12 +7,12 @@ resources:
 
 # Home Assistant
 - base/ha.yaml
-- base/wyze.yaml
+#- base/wyze.yaml
 
 # Networking
 # - base/adguard.yaml
-- base/unifi.yaml
-- base/unifi-poller.yaml
+#- base/unifi.yaml
+#- base/unifi-poller.yaml
 
 # Media Services
 # - base/beets.yaml
@@ -23,23 +23,23 @@ resources:
 - base/tanoshi.yaml
 
 # Services
-- base/n8n.yaml
-- base/wandb.yaml
-- base/feedpushr.yaml
-- base/grocy.yaml
+#- base/n8n.yaml
+#- base/wandb.yaml
+#- base/feedpushr.yaml
+#- base/grocy.yaml
 - base/archivebox.yaml
-- base/change.yaml
-- base/taskwarrior.yaml
-- base/wallabag.yaml
-- base/milvus.yaml
-- base/actual.yaml
-- base/jupyterlab.yaml
-- base/librex.yaml
+#- base/change.yaml
+#- base/taskwarrior.yaml
+#- base/wallabag.yaml
+#- base/milvus.yaml
+#- base/actual.yaml
+#- base/jupyterlab.yaml
+#- base/librex.yaml
 
 #  Postgres Storage
 - base/postgres/ha.yaml
-- base/postgres/n8n.yaml
-- base/postgres/wallabag.yaml
+#- base/postgres/n8n.yaml
+#- base/postgres/wallabag.yaml
 
 # Matrix
 # - base/matrix/synapse.yaml

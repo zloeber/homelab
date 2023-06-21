@@ -17,7 +17,7 @@ spec:
     version: "14"
   volume:
     size: 1Gi
-    storageClass: iscsi
+    storageClass: local-path
   resources:
     requests:
       cpu: 50m

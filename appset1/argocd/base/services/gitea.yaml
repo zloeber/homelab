@@ -77,7 +77,7 @@ spec:
             argocd.argoproj.io/sync-options: Delete=false
           enabled: true
           size: 10Gi
-          storageClass: iscsi
+          storageClass: local-path
         podSecurityContext:
           fsGroup: 1000
         postgresql:
