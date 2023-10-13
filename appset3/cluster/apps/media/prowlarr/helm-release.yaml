@@ -1,0 +1,88 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: prowlarr
+  namespace: media
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: app-template
+      version: 1.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s-charts
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    controller:
+      type: statefulset
+      annotations:
+        reloader.stakater.com/auto: "true"
+    image:
+      repository: ghcr.io/onedr0p/prowlarr-nightly
+      tag: 1.6.3.3606@sha256:80164ae010a77ac244603ef312b24061f88ee2a3e63346df9d9911d72bbc10ab
+    env:
+      TZ: "${TIMEZONE}"
+    service:
+      main:
+        ports:
+          http:
+            port: 9696
+
+    dnsConfig:
+      options:
+        - name: ndots
+          value: "1"
+
+    podSecurityContext:
+      runAsUser: 0
+      runAsGroup: 0
+    persistence:
+      config:
+        enabled: true
+        existingClaim: prowlarr-config
+      shared:
+        enabled: true
+        type: emptyDir
+        mountPath: /shared
+      backups:
+        enabled: true
+        mountPath: /config/Backups
+        # mountOptions: nolock
+        type: nfs
+        server: "${PRIMARY_NFS_SERVER}"
+        path: "${NFS_KUBERNETES_PATH}/backups/prowlarr"
+
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: networking-rfc1918-ips@kubernetescrd
+          hajimari.io/enable: "true"
+          hajimari.io/group: "Media"
+          hajimari.io/icon: "cloud-search"
+        hosts:
+          - host: &host "prowlarr.home.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+        tls:
+          - secretName: "wildcard-internal-${SECRET_DOMAIN/./-}-tls"
+            hosts:
+              - *host
+
+    resources:
+      requests:
+        cpu: 15m
+        memory: 443M
+      limits:
+        memory: 454M

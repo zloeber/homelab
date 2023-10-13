@@ -5,16 +5,16 @@ bases:
 
 namespace: homeassistant
 
-patches:
-- patch: |-
-    - op: add
-      path: "/spec/template/spec/nodeSelector"
-      value:
-        kubernetes.io/hostname: node-two
-        kubernetes.io/arch: amd64
-  target:
-    kind: Deployment
-    name: home-assistant
+# patches:
+# - patch: |-
+#     - op: add
+#       path: "/spec/template/spec/nodeSelector"
+#       value:
+#         kubernetes.io/hostname: node-two
+#         kubernetes.io/arch: amd64
+#   target:
+#     kind: Deployment
+#     name: home-assistant
 
 images:
 - name: homeassistant/home-assistant

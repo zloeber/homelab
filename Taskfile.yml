@@ -31,7 +31,7 @@ vars:
     sh: 'git tag -l | sort -r -V | head -n 1 2>/dev/null || echo "not a git repo"'
   task_binary: "{{.LOCAL_BIN_PATH}}/task"
   asdf_path:
-    sh: if [ -d ~/.asdf ]; then echo "~/.asdf"; else echo "{{.ROOT_PATH}}/.asdf"; fi
+    sh: if [ -d "$HOME/.asdf" ]; then echo "$HOME/.asdf"; else echo "{{.ROOT_PATH}}/.asdf"; fi
   TERM: screen-256color
   DOCS_PATH: "{{.ROOT_PATH}}/docs"
   DEPLOY_PATH: "{{.ROOT_PATH}}/deploy"
@@ -57,27 +57,28 @@ dotenv:
   - '.SECRET'
 
 includes:
-  postgres: ./tasks/postgres.Taskfile.yaml
-  tailscale: ./tasks/tailscale.Taskfile.yaml
-  vault: ./tasks/vault.Taskfile.yaml
-  vultr: ./tasks/vultr.Taskfile.yaml
-  tf: ./tasks/tf.Taskfile.yaml
-  secrets: ./tasks/secrets.Taskfile.yaml
-  longhorn: ./tasks/longhorn.Taskfile.yaml
-  cluster: ./tasks/taskfiles/cluster
-  matrix: ./tasks/matrix.Taskfile.yaml
-  argocd: ./tasks/taskfiles/argocd
-  git: ./tasks/taskfiles/git
-  asdf: ./tasks/taskfiles/asdf
-  hugo: ./tasks/taskfiles/hugo
-  install: ./tasks/taskfiles/install
-  pi: ./tasks/taskfiles/pi
-  docker: ./tasks/taskfiles/docker
-  python: ./tasks/taskfiles/python
-  workstation: ./tasks/taskfiles/workstation
-  kind: ./tasks/taskfiles/kind
-  k3d: ./tasks/taskfiles/k3d
-  teller: ./tasks/taskfiles/teller
+  postgres: ./.taskfiles/postgres.Taskfile.yaml
+  tailscale: ./.taskfiles/tailscale.Taskfile.yaml
+  vault: ./.taskfiles/vault.Taskfile.yaml
+  vultr: ./.taskfiles/vultr.Taskfile.yaml
+  tf: ./.taskfiles/tf.Taskfile.yaml
+  secrets: ./.taskfiles/secrets.Taskfile.yaml
+  longhorn: ./.taskfiles/longhorn.Taskfile.yaml
+  cluster: ./.taskfiles/cluster
+  matrix: ./.taskfiles/matrix.Taskfile.yaml
+  argocd: ./.taskfiles/argocd
+  git: ./.taskfiles/git
+  asdf: ./.taskfiles/asdf
+  hugo: ./.taskfiles/hugo
+  install: ./.taskfiles/install
+  pi: ./.taskfiles/pi
+  docker: ./.taskfiles/docker
+  python: ./.taskfiles/python
+  workstation: ./.taskfiles/workstation
+  kind: ./.taskfiles/kind
+  k3d: ./.taskfiles/k3d
+  teller: ./.taskfiles/teller
+  cloudflared: ./.taskfiles/cloudflared
 
 silent: true
 
@@ -110,6 +111,7 @@ tasks:
       echo "GITHUB_USER {{.GITHUB_USER}}"
       echo "AUTHOR_NAME {{.AUTHOR_NAME}}"
       echo "AUTHOR_EMAIL {{.AUTHOR_EMAIL}}"
+      echo "asdf_path {{.asdf_path}}"
 
   show:all:
     desc: Show all output for subtasks groups as well
@@ -272,6 +274,7 @@ tasks:
       - helm repo add pixie-operator https://pixie-operator-charts.storage.googleapis.com
       - helm repo add eraser https://azure.github.io/eraser/charts
       - helm repo add vmware-tanzu https://vmware-tanzu.github.io/helm-charts
+      - helm repo add banzaicloud-stable https://kubernetes-charts.banzaicloud.com
       - task: clear
       - echo -e "This will add new repositories to your local Helm\n"
       - task: highlight_normal
@@ -306,18 +309,35 @@ tasks:
     cmds:
       - task: docker:login
 
-  start:k3d:
-    desc: Start a full local deployment to k3d
+  start:cluster:
+    desc: Start a local kubernetes cluster via k3d
     cmds:
       - task: k3d:delete
       - task: k3d:start
       - task: repos
       - task: k3d:config:export
+
+  stop:cluster:
+    desc: Stop a local kube cluster
+    cmds:
+      - task: k3d:delete
+
+  bootstrap:cluster:argocd:
+    desc: Bootstrap a local kubernetes cluster via argocd
+    vars:
+      APPSET: appset1
+    cmds:
       - task: argocd:build:sidecar
       - task: argocd:push:sidecar
       - task: argocd:secret
       - task: argocd:deploy
       - task: argocd:repo
+
+  start:
+    desc: Start a full local deployment to k3d
+    cmds:
+      - task: start:cluster
+      - task: bootstrap:cluster:argocd
 
   # start:
   #   desc: start local cluster via k3d
@@ -345,3 +365,4 @@ tasks:
         echo -e \
         "\n{{range $key, $value := .}} {{$key }}:  \e[92m{{$value}}\e[0m\n {{end}}\n"
     silent: true
+

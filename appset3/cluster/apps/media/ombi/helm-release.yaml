@@ -1,0 +1,75 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: ombi
+  namespace: media
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: ombi
+      version: 11.5.2
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  dependsOn:
+    - name: traefik
+      namespace: networking
+  values:
+    controller:
+      type: statefulset
+      annotations:
+        reloader.stakater.com/auto: "true"
+
+    image:
+      repository: ghcr.io/linuxserver/ombi
+      tag: v4.39.1-ls159
+
+    env:
+      TZ: "${TIMEZONE}"
+    #   PUID: "816"
+    #   GUID: "816"
+    # podSecurityContext:
+    #   runAsUser: 816
+    #   runAsGroup: 816
+    #   fsGroup: 816
+    #   fsGroupChangePolicy: "OnRootMismatch"
+
+    dnsConfig:
+      options:
+        - name: ndots
+          value: "1"
+
+    persistence:
+      config:
+        enabled: true
+        existingClaim: ombi-config
+
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.middlewares: "networking-rfc1918-ips@kubernetescrd"
+          hajimari.io/enable: "true"
+          hajimari.io/group: "Media"
+        hosts:
+          - host: &host "ombi.home.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+        tls:
+          - secretName: "wildcard-internal-${SECRET_DOMAIN/./-}-tls"
+            hosts:
+              - *host
+
+      resources:
+        requests:
+          cpu: 15m
+          memory: 588M
+        limits:
+          memory: 618M

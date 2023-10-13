@@ -1,0 +1,131 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: hajimari
+  namespace: household
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: hajimari
+      version: 2.0.2
+      sourceRef:
+        kind: HelmRepository
+        name: hajimari-charts
+        namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+
+  values:
+    image:
+      repository: ghcr.io/toboshii/hajimari
+      tag: v0.3.1
+
+    env:
+      TZ: ${TIMEZONE}
+
+    dnsConfig:
+      options:
+        - name: ndots
+          value: "1"
+
+    hajimari:
+      # displays all discovered apps
+      defaultEnable: false
+
+      # Config
+      showAppGroups: true
+      showAppStatus: true
+      showAppUrls: false
+      darkTheme: espresso
+      showGreeting: false
+
+      # namespaces to discover applications
+      namespaceSelector:
+        matchNames:
+          - auth
+          - backups
+          - databases
+          - default
+          - development
+          - household
+          - joplin
+          - kube-system
+          - media
+          - monitoring
+          - networking
+          - security
+          - storage
+          - system
+          - vaultwarden
+          - vpn
+      name: "citizen"
+      customApps:
+        - group: networking
+          apps:
+            - name: OPNSense
+              icon: 'mdi:wall-fire'
+              url: https://firewall.${FIREWALL_URI}/
+        - group: monitoring
+          apps:
+            - name: Uptime-Kuma
+              icon: 'mdi:alert-circle-check'
+              url: https://status.${SECRET_DOMAIN}/
+        - group: storage
+          apps:
+            - name: OurShare
+              icon: 'mdi:nas'
+              url: https://ourshare.home:5001/
+            - name: OurBackup
+              icon: 'mdi:nas'
+              url: https://ourbackup.home:5001/
+      globalBookmarks:
+        - group: Talos
+          bookmarks:
+            - name: Talos
+              url: "https://www.talos.dev/"
+            - name: "Github: Talos"
+              url: "https://github.com/siderolabs/talos"
+            - name: "Github: TalHelper"
+              url: "https://github.com/budimanjojo/talhelper"
+        - group: k8s@home
+          bookmarks:
+            - name: Search
+              url: https://nanne.dev/k8s-at-home-search
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          hajimari.io/enable: "true"
+          hajimari.io/icon: "weather-sunset"
+          hajimari.io/group: "Home"
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        hosts:
+          - host: &host "hajimari.home.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+            secretName: "wildcard-internal-${SECRET_DOMAIN/./-}-tls"
+
+    persistence:
+      data:
+        enabled: true
+        existingClaim: hajimari-config
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: "hajimari-settings"
+    resources:
+      requests:
+        cpu: 15m
+        memory: 64M
+      limits:
+        memory: 64M

@@ -1,0 +1,35 @@
+---
+version: "3"
+
+vars:
+  PROJECT_DIR:
+    sh: "git rev-parse --show-toplevel"
+  CLUSTER_DIR: "{{.PROJECT_DIR}}/cluster"
+
+includes:
+  cluster: .taskfiles/cluster.yml
+  etcd: .taskfiles/etcd.yml
+  flux: .taskfiles/flux.yml
+  format: .taskfiles/format.yml
+  install: .taskfiles/install.yml
+  lint: .taskfiles/lint.yml
+  pre-commit: .taskfiles/pre-commit.yml
+  rook: .taskfiles/rook.yml
+  sops: .taskfiles/sops.yml
+  talos: .taskfiles/talos.yml
+
+tasks:
+  git-rebase:
+    dir: '{{.PROJECT_DIR}}'
+    cmds:
+      - git stash push -u
+      - git pull --rebase --stat
+      - git stash apply
+
+  git-sync:
+    dir: '{{.PROJECT_DIR}}'
+    cmds:
+      - git stash push -u
+      - git pull --rebase --stat
+      - git push origin HEAD --
+      - git stash apply

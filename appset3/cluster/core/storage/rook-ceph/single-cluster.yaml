@@ -1,0 +1,180 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: rook-ceph-cluster
+  namespace: storage
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://charts.rook.io/release
+      chart: rook-ceph-cluster
+      version: v1.11.8
+      sourceRef:
+        kind: HelmRepository
+        name: rook-ceph-charts
+        namespace: flux-system
+  dependsOn:
+    - name: rook-ceph
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    configOverride: |
+      [global]
+      bdev_enable_discard = true
+      bdev_async_discard = true
+      mon clock drift allowed = 0.8
+    operatorNamespace: storage
+    toolbox:
+      enabled: true
+    monitoring:
+      enabled: true
+      createPrometheusRules: true
+    ingress:
+      dashboard:
+        annotations:
+          kubernetes.io/ingress.class: "traefik"
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          traefik.ingress.kubernetes.io/router.middlewares: "networking-rfc1918-ips@kubernetescrd"
+          hajimari.io/enable: "true"
+          hajimari.io/appName: "Rook/Ceph"
+          hajimari.io/group: "storage"
+        host:
+          name: &host "rook.home.${SECRET_DOMAIN}"
+          path: "/"
+        tls:
+          - hosts:
+              - *host
+            secretName: "wildcard-internal-${SECRET_DOMAIN/./-}-tls"
+    cephObjectStores: []
+    cephFileSystems: []
+    cephClusterSpec:
+      dataDirHostPath: /var/lib/rook
+      dashboard:
+        enabled: true
+        urlPrefix: /
+        ssl: false
+      mon:
+        count: 3
+        allowMultiplePerNode: false
+      mgr:
+        count: 1
+      resources:
+        api:
+          requests:
+            cpu: "100m"
+            memory: "100Mi"
+        mgr:
+          requests:
+            cpu: "100m"
+            memory: "100Mi"
+        mon:
+          requests:
+            cpu: "100m"
+            memory: "100Mi"
+        osd:
+          requests:
+            cpu: "100m"
+            memory: "1000Mi"
+      storage:
+        useAllNodes: false
+        useAllDevices: false
+        onlyApplyOSDPlacement: false
+        nodes:
+          - name: "delta"
+            devices:
+              - name: "nvme0n1"
+          - name: "epsilon"
+            devices:
+              - name: "sda"
+          - name: "zeta"
+            devices:
+              - name: "nvme0n1"
+          - name: "eta"
+            devices:
+              - name: "sda"
+    cephBlockPools:
+      - name: ceph-block
+        # see https://github.com/rook/rook/blob/master/Documentation/ceph-pool-crd.md#spec for available configuration
+        spec:
+          failureDomain: host
+          replicated:
+            size: 3
+          enableRBDStats: true
+        storageClass:
+          enabled: true
+          name: ceph-block
+          isDefault: true
+          reclaimPolicy: Retain
+          allowVolumeExpansion: true
+          mountOptions: ["discard"]
+          # see https://github.com/rook/rook/blob/master/Documentation/ceph-block.md#provision-storage for available configuration
+          parameters:
+            csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
+            csi.storage.k8s.io/controller-expand-secret-namespace: storage
+            csi.storage.k8s.io/fstype: ext4
+            csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
+            csi.storage.k8s.io/node-stage-secret-namespace: storage
+            csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
+            csi.storage.k8s.io/provisioner-secret-namespace: storage
+            imageFeatures: layering
+            imageFormat: "2"
+      # - name: ceph-ecpool
+      #   # see https://github.com/rook/rook/blob/master/Documentation/ceph-pool-crd.md#spec for available configuration
+      #   spec:
+      #     failureDomain: host
+      #     erasureCoded:
+      #       dataChunks: 2
+      #       codingChunks: 1
+      #     # Set any property on a given pool
+      #     # see https://docs.ceph.com/docs/master/rados/operations/pools/#set-pool-values
+      #     parameters:
+      #       # Inline compression mode for the data pool
+      #       compression_mode: aggressive
+      #   storageClass:
+      #     enabled: true
+      #     name: ceph-ecblock
+      #     isDefault: false
+      #     reclaimPolicy: Retain
+      #     allowVolumeExpansion: true
+      #     mountOptions: []
+      #     # see https://github.com/rook/rook/blob/master/Documentation/ceph-block.md#provision-storage for available configuration
+      #     parameters:
+      #       csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
+      #       csi.storage.k8s.io/controller-expand-secret-namespace: storage
+      #       csi.storage.k8s.io/fstype: ext4
+      #       csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
+      #       csi.storage.k8s.io/node-stage-secret-namespace: storage
+      #       csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
+      #       csi.storage.k8s.io/provisioner-secret-namespace: storage
+      #       dataPool: ceph-ecpool
+      #       imageFeatures: layering
+      #       imageFormat: "2"
+
+
+  # https://rook.github.io/docs/rook/v1.9/ceph-monitoring.html
+  postRenderers:
+    - kustomize:
+        patches:
+          - patch: |-
+              # Remove CephNodeNetworkPacketDrops Alert
+              - op: remove
+                path: /spec/groups/6/rules/1
+              # Remove CephPGImbalance Alert
+              - op: remove
+                path: /spec/groups/2/rules/15
+              # Remove CephNodeInconsistentMTU Alert (Was rule 4, but 1 was removed...)
+              - op: remove
+                path: /spec/groups/6/rules/3
+
+            target:
+              group: monitoring.coreos.com
+              kind: PrometheusRule
+              name: "prometheus-ceph-rules"
+              version: v1

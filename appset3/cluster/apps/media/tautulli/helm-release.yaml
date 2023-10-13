@@ -1,0 +1,79 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: tautulli
+  namespace: media
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: tautulli
+      version: 11.4.2
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    controller:
+      type: statefulset
+      annotations:
+        reloader.stakater.com/auto: "true"
+    image:
+      repository: ghcr.io/k8s-at-home/tautulli
+      tag: v2.10.5
+    podSecurityContext:
+      runAsUser: 985
+      runAsGroup: 977
+      fsGroup: 977
+
+    env:
+      TZ: "${TIMEZONE}"
+      PUID: 985
+      PGID: 977
+
+    dnsConfig:
+      options:
+        - name: ndots
+          value: "1"
+
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          traefik.ingress.kubernetes.io/router.middlewares: "networking-rfc1918-ips@kubernetescrd"
+          hajimari.io/enable: "true"
+          hajimari.io/group: "Media"
+          hajimari.io/icon: "mdi:chart-bar"
+        hosts:
+          - host: &host "tautulli.home.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - secretName: "wildcard-internal-${SECRET_DOMAIN/./-}-tls"
+            hosts:
+              - *host
+
+    persistence:
+      config:
+        enabled: true
+        existingClaim: tautulli-config
+
+    resources:
+      requests:
+        cpu: 15m
+        memory: 145M
+      limits:
+        memory: 385M

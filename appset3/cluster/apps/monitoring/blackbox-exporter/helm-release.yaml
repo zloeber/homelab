@@ -1,0 +1,239 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: blackbox-exporter
+  namespace: monitoring
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://prometheus-community.github.io/helm-charts
+      chart: prometheus-blackbox-exporter
+      version: 7.10.0
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community-charts
+        namespace: flux-system
+      interval: 5m
+  install:
+    createNamespace: true
+  values:
+    fullnameOverride: blackbox-exporter
+    image:
+      repository: quay.io/prometheus/blackbox-exporter
+    ingress:
+      enabled: true
+      className: traefik
+      hosts:
+        - host: &host "blackbox.home.${SECRET_DOMAIN}"
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - hosts:
+            - *host
+          secretName: "wildcard-internal-${SECRET_DOMAIN/./-}-tls"
+
+    allowIcmp: true
+
+    pspEnabled: false
+
+    podSecurityContext:
+      sysctls:
+        - name: net.ipv4.ping_group_range
+          value: "1000 1000"
+
+    # extraArgs:
+    #   - "--log.level=debug"
+
+    securityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+    # Add NET_RAW to enable ICMP
+        add: ["NET_RAW"]
+
+    config:
+      modules:
+        http_2xx:
+          prober: http
+          timeout: 5s
+          http:
+            valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+            follow_redirects: true
+            preferred_ip_protocol: "ip4"
+
+        icmp:
+          prober: icmp
+          timeout: 30s
+          icmp:
+            preferred_ip_protocol: "ip4"
+
+        dns_public:
+          prober: dns
+          timeout: 5s
+          dns:
+            query_name: "www.google.com"
+            query_type: "A"
+            valid_rcodes:
+              - NOERROR
+            validate_answer_rrs:
+              fail_if_not_matches_regexp:
+                - "www\\.google\\.com\\.\\t.*\\tIN\\tA\\t.*"
+
+        dns_private:
+          prober: dns
+          timeout: 5s
+          dns:
+            query_name: "traefik.home.${SECRET_DOMAIN}"
+            query_type: "A"
+            valid_rcodes:
+              - NOERROR
+            validate_answer_rrs:
+              fail_if_not_matches_regexp:
+                - "traefik\\.home\\.${SECRET_DOMAIN}\\.\\t.*\\tIN\\tA\\t${TRAEFIK_ADDR/./\\.}"
+
+        dns_unifi:
+          prober: dns
+          timeout: 5s
+          dns:
+            query_name: "unifi.home"
+            query_type: "A"
+            valid_rcodes:
+              - NOERROR
+            validate_answer_rrs:
+              fail_if_not_matches_regexp:
+                - "unifi\\.home\\.\\t.*\\tIN\\tA\\t${UNIFI_ADDR/./\\.}"
+
+        dns_ad_blocking:
+          prober: dns
+          timeout: 5s
+          dns:
+            query_name: "googleadservices.com"
+            query_type: "A"
+            valid_rcodes:
+              - NOERROR
+            validate_answer_rrs:
+              fail_if_not_matches_regexp:
+                - "googleadservices\\.com\\.\\t.*\\tIN\\tA\\t0\\.0\\.0\\.0"
+
+    serviceMonitor:
+      enabled: true
+      defaults:
+        labels:
+          release: prometheus
+        interval: 2m
+        scrapeTimeout: 30s
+      targets:
+        # Network
+        - module: icmp
+          name: gateway-icmp
+          url: &gateway ${GATEWAY_ADDR}
+        - module: icmp
+          name: primary-nfs-icmp
+          url: ${PRIMARY_NFS_SERVER}
+        - module: icmp
+          name: secondary-nfs-icmp
+          url: ${SECONDARY_NFS_SERVER}
+
+        # Nodes
+        - module: icmp
+          name: delta-icmp
+          url: delta.home
+        - module: icmp
+          name: epsilon-icmp
+          url: epsilon.home
+        - module: icmp
+          name: zeta-icmp
+          url: zeta.home
+        - module: icmp
+          name: eta-icmp
+          url: eta.home
+
+        # DNS
+        - module: dns_public
+          name: gateway-public-dns
+          url: *gateway
+        # - module: dns_public
+        #   name: pihole-1-public-dns
+        #   url: &pihole1 ${PIHOLE_1_ADDR}
+        # - module: dns_public
+        #   name: pihole-2-public-dns
+        #   url: &pihole2 ${PIHOLE_2_ADDR}
+        # - module: dns_public
+        #   name: pihole-public-dns
+        #   url: &pihole ${PIHOLE_SHARED_ADDR}
+
+        - module: dns_private
+          name: gateway-private-dns
+          url: *gateway
+        # - module: dns_private
+        #   name: pihole-1-private-dns
+        #   url: *pihole1
+        # - module: dns_private
+        #   name: pihole-2-private-dns
+        #   url: *pihole2
+        # - module: dns_private
+        #   name: pihole-private-dns
+        #   url: *pihole
+
+        - module: dns_unifi
+          name: gateway-unifi-dns
+          url: *gateway
+        # - module: dns_unifi
+        #   name: pihole-1-unifi-dns
+        #   url: *pihole1
+        # - module: dns_unifi
+        #   name: pihole-2-unifi-dns
+        #   url: *pihole2
+        # - module: dns_unifi
+        #   name: pihole-unifi-dns
+        #   url: *pihole
+
+        - module: dns_ad_blocking
+          name: gateway-blocking-dns
+          url: *gateway
+        # - module: dns_ad_blocking
+        #   name: pihole-1-blocking-dns
+        #   url: *pihole1
+        # - module: dns_ad_blocking
+        #   name: pihole-2-blocking-dns
+        #   url: *pihole2
+        # - module: dns_ad_blocking
+        #   name: pihole-blocking-dns
+        #   url: *pihole
+    prometheusRule:
+      enabled: true
+      additionalLabels:
+        app: prometheus-operator
+        release: prometheus
+      rules:
+        # - alert: BlackboxSslCertificateWillExpireSoon
+        #   expr: probe_ssl_earliest_cert_expiry - time() < 86400 * 3
+        #   for: 5m
+        #   labels:
+        #     severity: critical
+        #   annotations:
+        #     description: |-
+        #       The SSL certificate for {{"{{ $labels.target }}"}} will expire in less than 3 days
+        # - alert: BlackboxSslCertificateExpired
+        #   expr: probe_ssl_earliest_cert_expiry - time() <= 0
+        #   for: 5m
+        #   labels:
+        #     severity: critical
+        #   annotations:
+        #     description: |-
+        #       The SSL certificate for {{"{{ $labels.target }}"}} has expired
+        - alert: BlackboxProbeFailed
+          expr: probe_success == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            description: |-
+              The host {{"{{ $labels.target }}"}} is currently unreachable

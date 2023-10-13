@@ -33,3 +33,4 @@ kubeconfig
 Chart.lock
 .SECRET
 ./.secret/
+bootstrap

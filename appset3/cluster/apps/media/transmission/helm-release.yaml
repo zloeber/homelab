@@ -1,0 +1,140 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: transmission
+  namespace: media
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://bananaspliff.github.io/geek-charts
+      chart: transmission-openvpn
+      version: 0.1.0
+      sourceRef:
+        kind: HelmRepository
+        name: bananaspliff-charts
+        namespace: flux-system
+      interval: 5m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    replicaCount: 1
+
+    image:
+      repository: "haugene/transmission-openvpn"
+      tag: "5.0"
+      pullPolicy: "Always"
+
+    ingress:
+      enabled: false
+
+    env:
+      - name: CREATE_TUN_DEVICE
+        value: "false"
+      - name: OPENVPN_PROVIDER
+        value: "PIA" # VPN provider. List of supported providers: https://haugene.github.io/docker-transmission-openvpn/supported-providers/
+      - name: OPENVPN_CONFIG
+        value: "ca_montreal"
+      - name: OPENVPN_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: "openvpn"
+            key: "OVPN_USER"
+      - name: OPENVPN_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: "openvpn"
+            key: "OVPN_PASS"
+      - name: LOCAL_NETWORK
+        valueFrom:
+          secretKeyRef:
+            name: "openvpn"
+            key: "LOCAL_NETWORK"
+      - name: TRANSMISSION_DOWNLOAD_DIR
+        value: "/downloads"
+      - name: TRANSMISSION_INCOMPLETE_DIR
+        value: "/incomplete"
+      - name: TRANSMISSION_SCRAPE_PAUSED_TORRENTS_ENABLED
+        value: "false"
+      - name: PUID
+        value: "985"
+      - name: PGID
+        value: "977"
+      - name: TRANSMISSION_WEB_UI
+        value: transmission-web-control
+
+    podSecurityContext:
+      fsGroup: 977
+      runAsUser: 0
+      runAsGroup: 0
+    volumes:
+      - name: "dev-tun" # Needed for VPN
+        hostPath:
+          path: "/dev/net/tun"
+      - name: "transmission-config"
+        persistentVolumeClaim:
+          claimName: "transmission-config"
+      - name: "transmission-incomplete"
+        nfs:
+          server: "${PRIMARY_NFS_SERVER}"
+          path: "${NFS_KUBERNETES_PATH}/active/transmission-incomplete"
+      - name: "transmission-downloads"
+        nfs:
+          server: "${PRIMARY_NFS_SERVER}"
+          path: "${NFS_KUBERNETES_PATH}/active/media-downloaded"
+      - name: "transmission-other"
+        nfs:
+          server: ${SECONDARY_NFS_SERVER}
+          path: "/volume1/OtherStorage"
+
+    volumeMounts:
+      - name: "transmission-config"
+        mountPath: "/data"
+        subPath: "configs/transmission-home"
+      - name: "transmission-incomplete"
+        mountPath: "/incomplete"
+      - name: "transmission-downloads"
+        mountPath: "/downloads"
+      - name: "transmission-other"
+        mountPath: "/other"
+      - name: "dev-tun"
+        mountPath: "/dev/net/tun" # Needed for VPN
+
+    securityContext:
+      capabilities: # Needed for VPN
+        add:
+          - NET_ADMIN
+
+    resources:
+      requests:
+        cpu: 48m
+        memory: 1555M
+      limits:
+        memory: 3778M
+  postRenderers:
+    - kustomize:
+        patchesStrategicMerge:
+          - apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: transmission-transmission-openvpn
+            spec:
+              template:
+                spec:
+                  containers:
+                    - name: transmission-openvpn
+                      livenessProbe:
+                        exec:
+                          command:
+                            - sh
+                            - -c
+                            - /etc/scripts/healthcheck.sh
+                        initialDelaySeconds: 15
+                        periodSeconds: 20
+                        timeoutSeconds: 5

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 here=$(pwd)
 
@@ -14,7 +14,8 @@ if [ "$first_run" = "true" ]; then
     task workstation:install:base
 fi
 
-task python:venv --force
+task python:venv python:install --force
+source ./venv/bin/activate
 task teller:install --force
 task asdf:bootstrap
 #task aqua:sync

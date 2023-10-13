@@ -15,6 +15,14 @@ This project has so many disparate scripts and tasks that it may be hard to find
 
 # Install
 
+## Workstation (Ubuntu)
+
+First setup the workstation with essential tools and a cli environment
+
+```bash
+./scripts/workstation-bootstrap.sh
+./venv/bin/task workstation:install:base
+```
 Dependencies can be installed after cloning this repo.
 
 ```bash

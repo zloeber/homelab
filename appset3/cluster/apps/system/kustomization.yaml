@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - descheduler
+  - external-dns
+  - k8s-dns-gateway
+  - kube-cleanup-operator
+  - kube-fledged
+  - metrics-server
+  - reflector
+  - reloader
+  - smtp-relay

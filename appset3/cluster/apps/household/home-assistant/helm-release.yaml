@@ -1,0 +1,141 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: home-assistant
+  namespace: household
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: home-assistant
+      version: 13.4.2
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    env:
+      TZ: "${TIMEZONE}"
+
+    image:
+      repository: ghcr.io/home-assistant/home-assistant
+      tag: "2023.6"
+
+    dnsConfig:
+      options:
+        - name: ndots
+          value: "1"
+
+    persistence:
+      config:
+        enabled: true
+        existingClaim: homeassistant-config
+      backups:
+        enabled: true
+        mountPath: /config/backups
+        type: nfs
+        server: "${PRIMARY_NFS_SERVER}"
+        path: "${NFS_KUBERNETES_PATH}/backups/homeassistant"
+
+    resources:
+      requests:
+        cpu: 34m
+        memory: 381M
+      limits:
+        memory: 1G
+
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          external-dns.alpha.kubernetes.io/target: "${SECRET_DOMAIN}"
+          external-dns/is-public: "true"
+          hajimari.io/enable: "true"
+          hajimari.io/icon: "home-automation"
+          hajimari.io/group: "Home"
+        hosts:
+          - host: &host "home-assistant.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+            secretName: "wildcard-${SECRET_DOMAIN/./-}-tls"
+
+    metrics:
+      enabled: true
+      serviceMonitor:
+        bearerTokenSecret:
+          name: prometheus-token
+          key: token
+
+    prometheusRule:
+      enabled: true
+      labels: {}
+      # -- Configure additionial rules for the chart under this key.
+      # @default -- See prometheusrules.yaml
+      rules:
+        - alert: HomeAssistantAbsent
+          annotations:
+            description: Home Assistant has disappeared from Prometheus service discovery.
+            summary: Home Assistant is down.
+          expr: |
+            absent(up{job=~".*home-assistant.*"} == 1)
+          for: 5m
+          labels:
+            severity: critical
+
+    addons:
+      codeserver:
+        enabled: true
+        image:
+          repository: ghcr.io/k8s-at-home/code-server
+          tag: v4.6.0
+        workingDir: "/config"
+        args:
+          - --auth
+          - "none"
+          - --user-data-dir
+          - "/config/.vscode"
+          - --extensions-dir
+          - "/config/.vscode"
+        resources:
+          requests:
+            cpu: 10m
+            memory: 127M
+          limits:
+            memory: 512M
+        ingress:
+          enabled: true
+          ingressClassName: "traefik"
+          annotations:
+            traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+            traefik.ingress.kubernetes.io/router.middlewares: "networking-rfc1918-ips@kubernetescrd"
+            hajimari.io/enable: "true"
+            hajimari.io/icon: microsoft-visual-studio-code
+            hajimari.io/appName: "Home-Assistant Config Editor"
+            hajimari.io/group: "Home"
+          hosts:
+            - host: &host-config "hass-config.home.${SECRET_DOMAIN}"
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls:
+            - hosts:
+                - *host-config
+              secretName: "wildcard-internal-${SECRET_DOMAIN/./-}-tls"
+        volumeMounts:
+          - name: config
+            mountPath: /config

@@ -1,0 +1,83 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: mealie
+  namespace: household
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: mealie
+      version: 5.1.2
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: &repo hkotel/mealie
+      tag: frontend-v1.0.0beta-5
+      pullPolicy: IfNotPresent
+
+    env: &env
+      TZ: "${TIMEZONE}"
+      DEFAULT_EMAIL: "${SECRET_CLOUDFLARE_EMAIL}"
+      AUTO_BACKUP_ENABLED: true
+      BASE_URL: https://meals.${SECRET_DOMAIN}
+      SMTP_HOST: smtp-relay.system.svc.cluster.local.
+      SMTP_PORT: 2525
+      SMTP_FROM_NAME: meals@${SECRET_DOMAIN}
+      SMTP_AUTH_STRATEGY: none
+      SMTP_FROM_EMAIL: meals@${SECRET_DOMAIN}
+
+    resources:
+      requests:
+        cpu: 10m
+        memory: 226M
+      limits:
+        memory: 284M
+
+    api:
+      image:
+        repository: *repo
+        tag: api-v1.0.0beta-5
+        pullPolicy: IfNotPresent
+      env: *env
+
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          external-dns.alpha.kubernetes.io/target: "${SECRET_DOMAIN}"
+          external-dns/is-public: "true"
+          hajimari.io/enable: "true"
+          hajimari.io/icon: "food"
+          hajimari.io/appName: "Mealie"
+          hajimari.io/group: "Home"
+        hosts:
+          - host: &host "meals.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - secretName: "wildcard-${SECRET_DOMAIN/./-}-tls"
+            hosts:
+              - *host
+
+    persistence:
+      config:
+        enabled: true
+        existingClaim: mealie-db
+      api-data:
+        enabled: true
+        existingClaim: mealie-api-data
+      backups:
+        enabled: true
+        mountPath: /app/data/backups
+        type: nfs
+        server: "${PRIMARY_NFS_SERVER}"
+        path: "${NFS_KUBERNETES_PATH}/backups/mealie"

@@ -1,5 +1,5 @@
 #!/bin/bash
 
-python3 -m venv ./.local/venv
+python3 -m venv ./venv
 
-echo "source ./.local/venv/bin/activate"
+echo "source ./venv/venv/bin/activate"

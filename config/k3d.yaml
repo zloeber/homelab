@@ -39,7 +39,7 @@ options:
       - arg: --disable-cloud-controller
         nodeFilters:
           - server:*
-      - arg: --tls-san=homelab.loeber.live,linbox4.bighouse.local,linbox4,homelab
+      - arg: --tls-san=homelab.loeber.live,linbox4,homelab
         nodeFilters:
           - server:*
 ports:
